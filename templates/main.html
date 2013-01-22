@@ -1,0 +1,112 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="../static/css/bootstrap-responsive.css" rel="stylesheet">
+	<link href="../static/css/bootstrap.css" rel="stylesheet" media="screen">
+</head>
+
+<body>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+
+<div class="container">
+  <div class="row">
+    {% if username %}
+      <h2 class="muted">Hi, {{ username }}</h2>
+      <hr>
+      <p class="lead"><strong>The batch(s) you have pulled</strong></p>
+        <form action="/label" method="post">
+          {% for batch in batchs %}
+          <div class="row">
+          <div class="span2">
+            <label class="radio"><input type="radio" name="pull_batch" value="{{batch}}" checked="true">
+              Batch {{batch}}
+            </label>
+          </div>
+          <div class="span2">
+              {% set counter=batch|int() %}
+                {% if result['labeld'][counter-1] == 100 %}
+                  <span class="badge badge-success">Finished</span>
+                {% else %}
+                  <span class="badge badge-info">Labeled {{result['labeld'][counter-1]}}/100</span>
+                {% endif %}
+          </div>
+          </div>
+          {% endfor %}
+          <!--<input type="hidden" name="tweet_nr" value="1">-->
+          <input type="submit" name="submit" value="Go to Label" class="btn btn-success btn-large">
+        </form>
+      <hr>
+      <p class="lead"><strong>Existing Batch</strong>
+      {% if result %}
+        <table class="table table-hover">
+          <tr>
+            <td><strong>Batch#</strong></td>
+            <td><strong>Owner</strong></td>
+            <td><strong>Labeled</strong></td>
+            <td><strong>Action</strong></td>
+          </tr>
+          <form action="/pull" method="post">
+            {% for i in range(0, 20)%}
+              <tr>
+                <td>{{result['batch'][i]}}</td>
+                <td>{{result['owner'][i]}}</td>
+                {% if result['labeld'][i] != 100 %}
+                  <td>{{result['labeld'][i]}}/100</td>
+                {% else %}
+                  <td><span class="label label-info">Finished</span></td>
+                {% endif %}
+                <td>
+                  {% if result['owner'][i] == "N/A" %}
+                    <label class="radio">
+                      <input type="radio" name="batch" value="{{result['batch'][i]}}">
+                      Pull
+                    </label>
+                  {% else %}
+                    <span class="label label-info">Taken</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td><input type="submit" class="btn btn-primary" value="Confirm"></td>
+            </tr>
+        </form>
+      </table>
+      <ul class="pager">
+        {% if page == 1 %}
+          <li class="previous disabled">
+            <a href="#">&larr; Previous</a>
+          </li>
+        {% else %}
+          <li class="previous">
+            <a href="/mainpage/{{page-1}}">&larr; Previous</a>
+          </li>
+        {% endif %}
+        Page {{page}}/10
+        {% if page == 10 %}
+          <li class="next disabled">
+            <a href="#">Next &rarr;</a>
+          </li>
+        {% else %}
+          <li class="next">
+            <a href="/mainpage/{{page+1}}">Next &rarr;</a>
+          </li>
+        {% endif %}
+      </ul>
+      {% endif %}
+    {% else %}
+      <h2 class="muted">Sorry you are not signed in</h2>
+      <p>Click <a href="#">here</a> to sing in</p>
+    {% endif %}
+	</div><!--end row-->
+</div><!--end container-->
+
+</body>
+</html>

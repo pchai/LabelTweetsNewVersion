@@ -1,0 +1,107 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../static/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="../static/css/bootstrap.css" rel="stylesheet" media="screen">
+</head>
+
+<body>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+
+<div class="container">
+  <div class="row">
+    {% if username %}
+      <h2 class="muted">Hi, {{ username }}</h2>
+      <a href="/mainpage/1" class="btn btn-warning">Home</a>
+      <hr>
+      <strong>Batch {{batch}}</strong><br>
+      Tweet Number: {{result["tweet_nr"]}}/100
+      <br>
+      <br>
+      <form action="/label" method="POST">
+        <strong>Tweet: </strong> {{result["text"]}}<br>
+        <input type="hidden" name="tweetid" value="{{result["id"]}}">
+        <input type="hidden" name="batch" value="{{batch}}">
+        <input type="hidden" name="tweet_nr" value="{{result["tweet_nr"]}}">
+        <!--Here start the surveys-->
+        <h2>Topic</h2>
+        <input type="checkbox" name="newton" value="newton">
+        &nbsp;Newton Massacre&nbsp;&nbsp;
+        <input type="checkbox" name="gunctrol" value="guncontrol">
+        &nbsp;Gun Control&nbsp;&nbsp;
+        <input type="checkbox" name="nra" value="nra">
+        &nbsp;NRA&nbsp;&nbsp;
+        <input type="checkbox" name="unsure" value="unsure">
+        &nbsp;Not Sure
+        <br>
+        <br>
+        <h2>Sentiment</h2>
+        <input type="radio" name="sentiment" value="pro">
+        &nbsp;Pro&nbsp;&nbsp;
+        <input type="radio" name="sentiment" value="against">
+        &nbsp;Con&nbsp;&nbsp;
+        <input type="radio" name="sentiment" value="neutral">
+        &nbsp;Neutral
+        <br>
+        <br>
+        <h2>Emotion</h2>
+        <input type="checkbox" name="sentiment" value="anger">
+        &nbsp;Anger&nbsp;&nbsp;
+        <input type="checkbox" name="sentiment" value="sad">
+        &nbsp;Sad&nbsp;&nbsp;
+        <input type="checkbox" name="sentiment" value="sympathy">
+        &nbsp;Sympathy
+        <input type="checkbox" name="sentiment" value="groupidentity">
+        &nbsp;Does it express group identity?
+        <br>
+        <br>
+        <h2>Organization</h2>
+        <input type="radio" name="org" value="news">
+        &nbsp;News Organization&nbsp;&nbsp;
+        <input type="radio" name="org" value="org">
+        &nbsp;Political Organization&nbsp;&nbsp;
+        <input type="radio" name="org" value="individual">
+        &nbsp;Individual&nbsp;&nbsp;
+        <input type="radio" name="org" value="unknown">
+        &nbsp;Not Sure
+        <br>
+        <br>
+        <h2>Information</h2>
+        <input type="checkbox" name="past_regulation" value="past_regulation">
+        &nbsp;Does is show information about past regulation of gun control&nbsp;&nbsp;
+        <br>
+        <input type="checkbox" name="call_to_action" value="call_to_action">
+        &nbsp;Does is show information about call to action(eg: Protest, Request to denote )&nbsp;&nbsp;
+        <br>
+        <br>
+        <h2>Link</h2>
+        Which of the following did you look to answer the above questions?<br>
+        <input type="radio" name="information" value="link">
+        &nbsp;Link&nbsp;&nbsp;
+        <input type="radio" name="information" value="tweet">
+        &nbsp;Tweet&nbsp;&nbsp;
+        <input type="radio" name="information" value="both">
+        &nbsp;Both&nbsp;&nbsp;
+        <input type="radio" name="information" value="neither">
+        &nbsp;Neither&nbsp;&nbsp;
+        <br>
+        <br>
+        <br>
+
+        <!--End Survey-->
+
+        <input type="submit" name="submit" value="next" class="btn btn-info btn-large">
+      </form>
+    {% else %}
+      <h2 class="muted">Sorry you are not signed in</h2>
+      <p>Click <a href="#">here</a> to sing in</p>
+    {% endif %}
+    </div><!--end row-->
+</div><!--end container-->
+
+</body>
+</html>

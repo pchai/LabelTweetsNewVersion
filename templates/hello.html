@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="../static/css/bootstrap-responsive.css" rel="stylesheet">
+	<link href="../static/css/bootstrap.css" rel="stylesheet" media="screen">
+</head>
+
+<style>
+body {
+    background: url(../static/img/Login.jpg) no-repeat center center fixed;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+</style>
+<body>
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="../static/js/bootstrap.min.js"></script>
+	<div class="container-fluid">
+	  <div class="row-fluid"  style="padding-top:100px">
+	  	<div class="span2">
+	  	</div>
+	    <div class="span6">
+			<form class="form-horizontal" action="/login" method="POST">
+  				<div class="control-group">
+    				<div class="controls">
+    					<h4 style="color: white">Please Sign in</h4><br>
+      					<input type="text" name="emailSignin" placeholder="Email">
+    				</div>
+  				</div>
+  				<div class="control-group">
+    				<div class="controls">
+      					<input type="submit" name="submit" class="btn btn-success" value="Sign in">
+    				</div>
+  				</div>
+      </form>
+			<br>
+			<br>
+			<br>
+      <form class="form-horizontal" action="/signup" method="POST">
+  				<div class="control-group">
+    				<div class="controls">
+    					<h4 style="color: white">First time? Please Sign up</h4><br>
+      					<input type="text" name="emailSignup" placeholder="Email">
+    				</div>
+  				</div>
+  				<div class="control-group">
+    				<div class="controls">
+      					<input type="text" name="userName" placeholder="User Name">
+    				</div>
+  				</div>
+  				<div class="control-group">
+    				<div class="controls">
+      					<input type="submit" name="submit" class="btn btn-warning" value="Sign up">
+    				</div>
+  				</div>
+			</form>
+	    </div>
+
+		<div class="span2">
+	      <!--Sidebar2 content-->
+	    </div>
+	  </div>
+	</div>
+
+</body>
+</html>
