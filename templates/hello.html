@@ -4,8 +4,8 @@
 	<meta charset="UTF-8">
 	<title></title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="../static/css/bootstrap-responsive.css" rel="stylesheet">
-	<link href="../static/css/bootstrap.css" rel="stylesheet" media="screen">
+	<link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet" media="screen">
 </head>
 
 <style>
@@ -19,7 +19,7 @@ body {
 </style>
 <body>
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
-	<script src="../static/js/bootstrap.min.js"></script>
+  <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
 	<div class="container-fluid">
 	  <div class="row-fluid"  style="padding-top:100px">
 	  	<div class="span2">

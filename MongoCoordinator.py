@@ -85,11 +85,13 @@ class MongoDBCoordinator:
         collection = self.dbh[myCollection]
         label_counter = (batch_nr - 1) * 100 + tweet_nr
         tweets = collection.find({"label_counter": label_counter})
-        result = {"id": "", "text": "", "label_counter": ""}
+        result = {"id": "", "text": "", "label_counter": "", "user": ""}
         for tweet in tweets:
             result["id"] = tweet.get("id_str")
             result["text"] = tweet.get("text")
             result["tweet_nr"] = str(tweet_nr)
+            user = tweet.get("user")
+            result["user"] = user["screen_name"]
         return result
 
     def get_labelled(self, batch_nr, batch):

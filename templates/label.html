@@ -4,79 +4,76 @@
     <meta charset="UTF-8">
     <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="../static/css/bootstrap-responsive.css" rel="stylesheet">
-    <link href="../static/css/bootstrap.css" rel="stylesheet" media="screen">
+    <link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet" media="screen">
 </head>
 
 <body>
 <script src="http://code.jquery.com/jquery-latest.js"></script>
-<script src="../static/js/bootstrap.min.js"></script>
+<script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
 
 <div class="container">
   <div class="row">
     {% if username %}
-      <h2 class="muted">Hi, {{ username }}</h2>
-      <a href="/mainpage/1" class="btn btn-warning">Home</a>
+      <a href="/gun_control/mainpage/1" class="btn btn-success">
+       Home
+      </a>
       <hr>
-      <strong>Batch {{batch}}</strong><br>
+      <strong>Batch {{batch}}</strong>&nbsp;&nbsp;
       Tweet Number: {{result["tweet_nr"]}}/100
       <br>
-      <br>
-      <form action="/label" method="POST">
+      <form action="/gun_control/label" method="POST">
         <strong>Tweet: </strong> {{result["text"]}}<br>
+        <strong>User Name: </strong> {{result["user"]}}
         <input type="hidden" name="tweetid" value="{{result["id"]}}">
         <input type="hidden" name="batch" value="{{batch}}">
         <input type="hidden" name="tweet_nr" value="{{result["tweet_nr"]}}">
+        <input type="submit" name="submit" value="Not English" class="btn btn-danger btn-small">
         <!--Here start the surveys-->
-        <h2>Topic</h2>
-        <input type="checkbox" name="newton" value="newton">
-        &nbsp;Newton Massacre&nbsp;&nbsp;
-        <input type="checkbox" name="gunctrol" value="guncontrol">
+        <h3>Topic</h3>
+        <input type="checkbox" name="newtown" value="true">
+        &nbsp;Newtown Massacre&nbsp;&nbsp;
+        <input type="checkbox" name="guncontrol" value="true">
         &nbsp;Gun Control&nbsp;&nbsp;
-        <input type="checkbox" name="nra" value="nra">
+        <input type="checkbox" name="nra" value="true">
         &nbsp;NRA&nbsp;&nbsp;
-        <input type="checkbox" name="unsure" value="unsure">
+        <input type="checkbox" name="unsure" value="true">
         &nbsp;Not Sure
         <br>
-        <br>
-        <h2>Sentiment</h2>
+        <h3>Sentiment</h3>
         <input type="radio" name="sentiment" value="pro">
         &nbsp;Pro&nbsp;&nbsp;
-        <input type="radio" name="sentiment" value="against">
+        <input type="radio" name="sentiment" value="con">
         &nbsp;Con&nbsp;&nbsp;
         <input type="radio" name="sentiment" value="neutral">
         &nbsp;Neutral
         <br>
-        <br>
         <h2>Emotion</h2>
-        <input type="checkbox" name="sentiment" value="anger">
+        <input type="checkbox" name="anger" value="true">
         &nbsp;Anger&nbsp;&nbsp;
-        <input type="checkbox" name="sentiment" value="sad">
+        <input type="checkbox" name="sad" value="true">
         &nbsp;Sad&nbsp;&nbsp;
-        <input type="checkbox" name="sentiment" value="sympathy">
+        <input type="checkbox" name="sympathy" value="true">
         &nbsp;Sympathy
-        <input type="checkbox" name="sentiment" value="groupidentity">
+        <input type="checkbox" name="groupidentity" value="true">
         &nbsp;Does it express group identity?
-        <br>
         <br>
         <h2>Organization</h2>
         <input type="radio" name="org" value="news">
         &nbsp;News Organization&nbsp;&nbsp;
-        <input type="radio" name="org" value="org">
+        <input type="radio" name="org" value="political">
         &nbsp;Political Organization&nbsp;&nbsp;
         <input type="radio" name="org" value="individual">
         &nbsp;Individual&nbsp;&nbsp;
         <input type="radio" name="org" value="unknown">
         &nbsp;Not Sure
         <br>
-        <br>
         <h2>Information</h2>
-        <input type="checkbox" name="past_regulation" value="past_regulation">
+        <input type="checkbox" name="past_regulation" value="true">
         &nbsp;Does is show information about past regulation of gun control&nbsp;&nbsp;
         <br>
-        <input type="checkbox" name="call_to_action" value="call_to_action">
+        <input type="checkbox" name="call_to_action" value="true">
         &nbsp;Does is show information about call to action(eg: Protest, Request to denote )&nbsp;&nbsp;
-        <br>
         <br>
         <h2>Link</h2>
         Which of the following did you look to answer the above questions?<br>
@@ -88,8 +85,6 @@
         &nbsp;Both&nbsp;&nbsp;
         <input type="radio" name="information" value="neither">
         &nbsp;Neither&nbsp;&nbsp;
-        <br>
-        <br>
         <br>
 
         <!--End Survey-->

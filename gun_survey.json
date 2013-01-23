@@ -1,31 +1,31 @@
 {
     "topic": {
-        "newton": false,
+        "newtown": false,
         "guncontrol": false,
-        "nra": false
-        "unsure": false,
-    }
+        "nra": false,
+        "unsure": false
+    },
     "sentiment": {
         "pro": false,
         "con": false,
-        "neutral": false,
-    }
+        "neutral": false
+    },
     "emotion": {
         "anger": false,
         "sad": false,
         "sympathy": false,
         "groupidentity": false
-    }
+    },
     "organization": {
         "news": false,
-        "org": false,
+        "political": false,
         "individual": false,
-        "unknown": false,
-    }
+        "unknown": false
+    },
     "information": {
         "past_regulation": false,
         "call_to_action": false
-    }
+    },
     "link": {
 
         "link": false,
