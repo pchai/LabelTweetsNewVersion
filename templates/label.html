@@ -31,6 +31,41 @@
         <input type="submit" name="submit" value="Not English" class="btn btn-danger btn-small">
         <!--Here start the surveys-->
         <h3>Topic</h3>
+        Is the tweet about any of the following topic? Check all that apply.<br>
+        <div class="btn-group" data-toggle="buttons-checkbox">
+            <input type="button" class="btn btn" name="newtown" value="Newtown Massacre"  data-toggle="collapse" data-target="#newtown">
+            <input type="button" class="btn btn" name="guncontrol" value="Gun Control" data-toggle="collapse" data-target="#guncontrol">
+            <input type="button" class="btn btn" name="nra" value="NRA" data-toggle="collapse" data-target="#nra">
+            <input type="button" class="btn btn" name="unsure" value="Not Sure">
+        </div>
+        <div id="newtown" class="collapse">
+            <strong>You chose Newtown Massacre. What is the sentiment of Newtown Massacre?</strong><br>
+            <input type="radio" name="newtown" value="pro">
+            &nbsp;Pro&nbsp;&nbsp;
+            <input type="radio" name="newtown" value="con">
+            &nbsp;Con&nbsp;&nbsp;
+            <input type="radio" name="newtown" value="neutral">
+            &nbsp;Neutral
+        </div>
+        <div id="guncontrol" class="collapse">
+            <strong>You chose Gun Control. What is the sentiment of Gun Control?</strong><br>
+            <input type="radio" name="guncontrol" value="pro">
+            &nbsp;Pro&nbsp;&nbsp;
+            <input type="radio" name="guncontrol" value="con">
+            &nbsp;Con&nbsp;&nbsp;
+            <input type="radio" name="guncontrol" value="neutral">
+            &nbsp;Neutral
+        </div>
+        <div id="nra" class="collapse">
+            <strong>You chose NRA. What is the sentiment of NRA?</strong><br>
+            <input type="radio" name="nra" value="pro">
+            &nbsp;Pro&nbsp;&nbsp;
+            <input type="radio" name="nra" value="con">
+            &nbsp;Con&nbsp;&nbsp;
+            <input type="radio" name="nra" value="neutral">
+            &nbsp;Neutral
+        </div>
+        <!--
         <input type="checkbox" name="newtown" value="true">
         &nbsp;Newtown Massacre&nbsp;&nbsp;
         <input type="checkbox" name="guncontrol" value="true">
@@ -39,48 +74,80 @@
         &nbsp;NRA&nbsp;&nbsp;
         <input type="checkbox" name="unsure" value="true">
         &nbsp;Not Sure
+        -->
         <br>
-        <h3>Sentiment</h3>
-        <input type="radio" name="sentiment" value="pro">
-        &nbsp;Pro&nbsp;&nbsp;
-        <input type="radio" name="sentiment" value="con">
-        &nbsp;Con&nbsp;&nbsp;
-        <input type="radio" name="sentiment" value="neutral">
-        &nbsp;Neutral
+        <h3>Emotion</h3>
+        Does this tweet contain any emotion appeal?<br>
+        <div class="btn-group" data-toggle="buttons-radio">
+            <input type="button" class="btn btn" name="emotion" value="Yes"  data-toggle="collapse" data-target="#emotion">
+            <input type="button" class="btn btn" name="emotion" value="No">
+        </div>
+        <div id="emotion" class="collapse">
+            <strong>If yes, which emotion(s)? Check all that apply</strong><br>
+            <input type="checkbox" name="anger" value="true">
+                &nbsp;Anger/Moral Outage&nbsp;&nbsp;
+            <input type="checkbox" name="sad" value="true">
+                &nbsp;Sadness/Sympathy&nbsp;&nbsp;
+            <input type="checkbox" name="sympathy" value="true">
+                &nbsp;Fear/Threat
+            <input type="checkbox" name="groupidentity" value="true">
+                &nbsp;Does it express group identity?
+        </div>
         <br>
-        <h2>Emotion</h2>
-        <input type="checkbox" name="anger" value="true">
-        &nbsp;Anger&nbsp;&nbsp;
-        <input type="checkbox" name="sad" value="true">
-        &nbsp;Sad&nbsp;&nbsp;
-        <input type="checkbox" name="sympathy" value="true">
-        &nbsp;Sympathy
-        <input type="checkbox" name="groupidentity" value="true">
-        &nbsp;Does it express group identity?
+        <h3>Information</h3>
+        Does this tweet contain an information appeal?<br>
+        <div class="btn-group" data-toggle="buttons-radio">
+            <input type="button" class="btn btn" name="information" value="Yes"  data-toggle="collapse" data-target="#information">
+            <input type="button" class="btn btn" name="information" value="No">
+        </div>
+        <div id="information" class="collapse">
+            <strong>If yes, what kinds of information? Check all that apply</strong><br>
+            <input type="checkbox" name="fact" value="true">
+                &nbsp;Information about facts/figures/statistics.<br>
+            <input type="checkbox" name="existing" value="true">
+                &nbsp;Information about existing laws or policies.<br>
+            <input type="checkbox" name="change" value="true">
+                &nbsp;Information about possible changes in law or policies.<br>
+            <input type="checkbox" name="event" value="true">
+                &nbsp;Information about a political event.
+        </div>
         <br>
-        <h2>Organization</h2>
-        <input type="radio" name="org" value="news">
-        &nbsp;News Organization&nbsp;&nbsp;
-        <input type="radio" name="org" value="political">
-        &nbsp;Political Organization&nbsp;&nbsp;
+
+        <h3>Message Goal</h3>
+        Does this tweet contain an explicit call to action?<br>
+        <div class="btn-group" data-toggle="buttons-radio">
+            <input type="button" class="btn btn" name="goal" value="Yes"  data-toggle="collapse" data-target="#goal">
+            <input type="button" class="btn btn" name="goal" value="No">
+        </div>
+        <div id="goal" class="collapse">
+            <strong>If yes, what types of action? Check all that apply</strong><br>
+            <input type="checkbox" name="petition" value="true">
+                &nbsp;Petition/Contacting politician(s)<br>
+            <input type="checkbox" name="protest" value="true">
+                &nbsp;Protest/Demonstration<br>
+            <input type="checkbox" name="denotion" value="true">
+                &nbsp;Monetary support/Denotion<br>
+            <input type="checkbox" name="voting" value="true">
+                &nbsp;Voting/Decision
+        </div>
+        <h3>Author</h3>
+        Is the author of this tweet a ___?<br>
         <input type="radio" name="org" value="individual">
-        &nbsp;Individual&nbsp;&nbsp;
+        &nbsp;Private individual&nbsp;&nbsp;
+        <input type="radio" name="org" value="news">
+        &nbsp;Representative of a news organization&nbsp;&nbsp;
+        <input type="radio" name="org" value="political">
+        &nbsp;Representative of a political organization&nbsp;&nbsp;
         <input type="radio" name="org" value="unknown">
         &nbsp;Not Sure
         <br>
-        <h2>Information</h2>
-        <input type="checkbox" name="past_regulation" value="true">
-        &nbsp;Does is show information about past regulation of gun control&nbsp;&nbsp;
-        <br>
-        <input type="checkbox" name="call_to_action" value="true">
-        &nbsp;Does is show information about call to action(eg: Protest, Request to denote )&nbsp;&nbsp;
-        <br>
-        <h2>Link</h2>
+
+        <h3>Link</h3>
         Which of the following did you look to answer the above questions?<br>
-        <input type="radio" name="information" value="link">
-        &nbsp;Link&nbsp;&nbsp;
         <input type="radio" name="information" value="tweet">
         &nbsp;Tweet&nbsp;&nbsp;
+        <input type="radio" name="information" value="link">
+        &nbsp;Appended Link&nbsp;&nbsp;
         <input type="radio" name="information" value="both">
         &nbsp;Both&nbsp;&nbsp;
         <input type="radio" name="information" value="neither">
@@ -92,7 +159,7 @@
         <input type="submit" name="submit" value="next" class="btn btn-info btn-large">
       </form>
     {% else %}
-      <h2 class="muted">Sorry you are not signed in</h2>
+      <h3 class="muted">Sorry you are not signed in</h3>
       <p>Click <a href="#">here</a> to sing in</p>
     {% endif %}
     </div><!--end row-->
