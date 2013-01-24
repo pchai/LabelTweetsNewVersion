@@ -54,18 +54,20 @@ class MongoDBCoordinator:
 
     def get_batchs(self, skip_nr, batch):
         myCollection = batch
-        if myCollection not in self.dbh.collection_names():
-            self.dbh.create_collection(myCollection)
-            for i in range(1, 201):
-                self.dbh[myCollection].insert({"batch": i, "owner": "N/A", "labeld": 0})
-            print "Create Collection..."
         collection = self.dbh[myCollection]
         batchs = collection.find(sort=[("batch", ASCENDING)]).skip(skip_nr * 20)
-        result = {"batch": [], "owner": [], "labeld": []}
+        result = {"batch": [], "owner": [], "labeld": [], "dict": []}
         for b in batchs:
+            owner = b.get("owner")
+            l1 = []
+            l2 = []
+            for k in owner.keys():
+                l1.append(k)
+                l2.append(owner[k])
             result["batch"].append(b.get("batch"))
-            result["owner"].append(b.get("owner"))
-            result["labeld"].append(b.get("labeld"))
+            result["owner"].append(l1)
+            result["labeld"].append(l2)
+            result["dict"].append(owner)
         return result
 
     def get_pull_batch(self, email, collection_name):
@@ -94,11 +96,12 @@ class MongoDBCoordinator:
             result["user"] = user["screen_name"]
         return result
 
-    def get_labelled(self, batch_nr, batch):
+    def get_labelled(self, batch_nr, batch, user_name):
         myCollection = batch
         collection = self.dbh[myCollection]
         result = collection.find_one({"batch": int(batch_nr)})
-        return result.get("labeld")
+        owner = result.get("owner")
+        return owner.get(user_name)
 
     def add_batch(self, batch_nr, batch, email, collection):
         '''This method will update the database when you extract'''
@@ -107,7 +110,12 @@ class MongoDBCoordinator:
         collection_member = self.dbh[memberCollection]
         collection_batch = self.dbh[batchCollection]
         user = collection_member.find_one({"email": email})
-        collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner": self.get_username(email)}}, safe=True)
+        name = user.get("user_name")
+        doc = collection_batch.find_one({"batch": int(batch_nr)})
+        owner = doc["owner"]
+        if name not in owner:
+            owner[name] = 0
+        collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner": owner}}, safe=True)
         if not user:
             return "Couldn't add"
         else:
@@ -119,11 +127,19 @@ class MongoDBCoordinator:
                 batch_list.append(batch_nr)
             collection_member.update({"email": email}, {"$set": {"batch." + collection: batch_list}}, safe=True)
 
-    def update_label(self, tweet_id, option, batch_nr, tweet_nr, collection, batch):
+    def update_label(self, tweet_id, option, batch_nr, tweet_nr, collection, batch, username):
         '''This method will upinsert the labelling of the tweet'''
         myCollection = collection
         batchCollection = batch
         collection = self.dbh[myCollection]
         collection_batch = self.dbh[batchCollection]
-        collection.update({"id_str": tweet_id}, {"$set": {"label_option": option}}, safe=True)
-        collection_batch.update({"batch": int(batch_nr)}, {"$set": {"labeld": int(tweet_nr)}}, safe=True)
+        result = collection.find_one({"id_str": tweet_id})
+        print result
+        if "label_option" in result:
+            print "Option in result"
+            collection.update({"id_str": tweet_id}, {"$set": {"label_option_extra": option}}, safe=True)
+        else:
+            print "Option not in result"
+            collection.update({"id_str": tweet_id}, {"$set": {"label_option": option}}, safe=True)
+        collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner."+username: int(tweet_nr)}}, safe=True)
+

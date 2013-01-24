@@ -10,12 +10,12 @@
             "pro": false,
             "con": false,
             "neutral": false
-        }
+        },
         "guncontrol": {
             "pro": false,
             "con": false,
             "neutral": false
-        }
+        },
         "nra": {
             "pro": false,
             "con": false,
@@ -29,7 +29,7 @@
         "groupidentity": false
     },
     "information": {
-        "facts": false,
+        "fact": false,
         "existing": false,
         "change": false,
         "event": false
