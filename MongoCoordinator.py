@@ -79,7 +79,6 @@ class MongoDBCoordinator:
             result["batch"].append(b.get("batch"))
             result["owner"].append(l1)
             result["labeld"].append(l2)
-        print result
         return result
 
     def get_pull_batch(self, email, collection_name):
