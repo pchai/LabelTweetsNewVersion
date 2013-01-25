@@ -54,9 +54,21 @@ class MongoDBCoordinator:
 
     def get_batchs(self, skip_nr, batch):
         myCollection = batch
+        if myCollection not in self.dbh.collection_names():
+            self.dbh.create_collection(myCollection)
+            for i in range(1, 101):
+                self.dbh[myCollection].insert({"batch": i, "owner": {}})
         collection = self.dbh[myCollection]
         batchs = collection.find(sort=[("batch", ASCENDING)]).skip(skip_nr * 20)
-        result = {"batch": [], "owner": [], "labeld": [], "dict": []}
+        allbatchs = collection.find(sort=[("batch", ASCENDING)])
+        result = {"batch": [], "owner": [], "labeld": [], "dict": [], "sampling": 0}
+        sampling = 0
+        for b in allbatchs:
+            owner = b.get("owner")
+            result["dict"].append(owner)
+            if len(owner.keys()) == 2:
+                sampling = sampling + 1
+        result["sampling"] = sampling
         for b in batchs:
             owner = b.get("owner")
             l1 = []
@@ -67,7 +79,7 @@ class MongoDBCoordinator:
             result["batch"].append(b.get("batch"))
             result["owner"].append(l1)
             result["labeld"].append(l2)
-            result["dict"].append(owner)
+        print result
         return result
 
     def get_pull_batch(self, email, collection_name):
@@ -78,6 +90,7 @@ class MongoDBCoordinator:
         batch_dict = user.get("batch")
         if collection_name in batch_dict:
             batch_list = batch_dict[collection_name]
+            batch_list.sort()
         else:
             batch_list = []
         return batch_list
@@ -87,13 +100,17 @@ class MongoDBCoordinator:
         collection = self.dbh[myCollection]
         label_counter = (batch_nr - 1) * 100 + tweet_nr
         tweets = collection.find({"label_counter": label_counter})
-        result = {"id": "", "text": "", "label_counter": "", "user": ""}
+        result = {"id": "", "text": "", "label_counter": "", "user": "", "link": []}
         for tweet in tweets:
             result["id"] = tweet.get("id_str")
             result["text"] = tweet.get("text")
             result["tweet_nr"] = str(tweet_nr)
             user = tweet.get("user")
             result["user"] = user["screen_name"]
+            entity = tweet.get("entities")
+            urls = entity["urls"]
+            for u in urls:
+                result["link"].append(u["expanded_url"])
         return result
 
     def get_labelled(self, batch_nr, batch, user_name):
@@ -111,6 +128,7 @@ class MongoDBCoordinator:
         collection_batch = self.dbh[batchCollection]
         user = collection_member.find_one({"email": email})
         name = user.get("user_name")
+        print batch_nr
         doc = collection_batch.find_one({"batch": int(batch_nr)})
         owner = doc["owner"]
         if name not in owner:

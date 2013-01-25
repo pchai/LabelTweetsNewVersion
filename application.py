@@ -115,16 +115,21 @@ def gun_label():
                 username = mongo.get_username(escape(session['username']))
             else:
                 return render_template("label.html")
+            option = {"not_english": True}
             batch = request.form["batch"]
             tweet_nr = request.form["tweet_nr"]
+            cong = False
             if int(tweet_nr) == 100:
+                cong = True
+            else:
+                cong = False
+            result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, "guncontrol")
+            tweet_id = request.form["tweetid"]
+            mongo.update_label(tweet_id, option, batch, tweet_nr, "guncontrol", "gunbatch", username)
+            if cong:
                 return render_template("cong.html")
             else:
-                result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, "guncontrol")
-                tweet_id = request.form["tweetid"]
-            option = {"not_english": True}
-            mongo.update_label(tweet_id, option, batch, tweet_nr, "guncontrol", "gunbatch")
-            return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr)
+                return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr)
 
         elif escape(request.form["submit"]) == "next":
             try:
@@ -135,74 +140,79 @@ def gun_label():
                     return render_template("label.html")
                 batch = request.form["batch"]
                 tweet_nr = request.form["tweet_nr"]
+                cong = False
                 if int(tweet_nr) == 100:
+                    cong = True
+                else:
+                    cong = False
+                result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, "guncontrol")
+                tweet_id = request.form["tweetid"]
+                option = gun_label_helper()
+                #Update topic section of the survey
+                #Update sentiment section of the survey
+                topic = option["topic"]
+                sentiment = option["sentiment"]
+                if "newtown" in request.form:
+                    topic["newtown"] = True
+                    sentiment["newtown"][request.form["newtown"]] = True
+                if "guncontrol" in request.form:
+                    topic["guncontrol"] = True
+                    sentiment["guncontrol"][request.form["guncontrol"]] = True
+                if "nra" in request.form:
+                    topic["nra"] = True
+                    sentiment["nra"][request.form["nra"]] = True
+                if "unsure" in request.form:
+                    topic["unsure"] = True
+
+                #Update emotion section of the survey
+                emotion = option["emotion"]
+                if "emotion" in request.form and request.form["emotion"] == "Yes":
+                    if "anger" in request.form and request.form["anger"] == "true":
+                        emotion["anger"] = True
+                    if "sad" in request.form and request.form["sad"] == "true":
+                        emotion["sad"] = True
+                    if "sympathy" in request.form and request.form["sympathy"] == "true":
+                        emotion["sympathy"] = True
+                    if "groupidentity" in request.form and request.form["groupidentity"] == "true":
+                        emotion["groupidentity"] = True
+
+                #Update information section of the survey
+                information = option["information"]
+                if "information" in request.form and request.form["information"] == "Yes":
+                    print "##information ##"
+                    if "fact" in request.form and request.form["fact"] == "true":
+                        information["fact"] = True
+                    if "existing" in request.form and request.form["existing"] == "true":
+                        information["existing"] = True
+                    if "change" in request.form and request.form["change"] == "true":
+                        information["change"] = True
+                    if "event" in request.form and request.form["event"] == "true":
+                        information["event"] = True
+
+                #Update goal section of the survey
+                goal = option["goal"]
+                if "goal" in request.form and request.form["goal"] == "Yes":
+                    if "petition" in request.form and request.form["petition"] == "true":
+                        goal["petition"] = True
+                    if "protest" in request.form and request.form["protest"] == "true":
+                        goal["protest"] = True
+                    if "denotion" in request.form and request.form["denotion"] == "true":
+                        goal["denotion"] = True
+                    if "voting" in request.form and request.form["voting"] == "true":
+                        goal["voting"] = True
+
+                #Update Author section of the survey
+                author = option["author"]
+                author[request.form["org"]] = True
+
+                #Update sentiment section of the survey
+                link = option["link"]
+                link[request.form["link"]] = True
+
+                mongo.update_label(tweet_id, option, batch, tweet_nr, "guncontrol", "gunbatch", username)
+                if cong:
                     return render_template("cong.html")
                 else:
-                    result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, "guncontrol")
-                    tweet_id = request.form["tweetid"]
-                    option = gun_label_helper()
-                    #Update topic section of the survey
-                    #Update sentiment section of the survey
-                    topic = option["topic"]
-                    sentiment = option["sentiment"]
-                    if "newtown" in request.form:
-                        topic["newtown"] = True
-                        sentiment["newtown"][request.form["newtown"]] = True
-                    if "guncontrol" in request.form:
-                        topic["guncontrol"] = True
-                        sentiment["guncontrol"][request.form["guncontrol"]] = True
-                    if "nra" in request.form:
-                        topic["nra"] = True
-                        sentiment["nra"][request.form["nra"]] = True
-                    if "unsure" in request.form:
-                        topic["unsure"] = True
-
-                    #Update emotion section of the survey
-                    emotion = option["emotion"]
-                    if "emotion" in request.form and request.form["emotion"] == "Yes":
-                        if "anger" in request.form and request.form["anger"] == "true":
-                            emotion["anger"] = True
-                        if "sad" in request.form and request.form["sad"] == "true":
-                            emotion["sad"] = True
-                        if "sympathy" in request.form and request.form["sympathy"] == "true":
-                            emotion["sympathy"] = True
-                        if "groupidentity" in request.form and request.form["groupidentity"] == "true":
-                            emotion["groupidentity"] = True
-
-                    #Update information section of the survey
-                    information = option["information"]
-                    if "information" in request.form and request.form["information"] == "Yes":
-                        print "##information ##"
-                        if "fact" in request.form and request.form["fact"] == "true":
-                            information["fact"] = True
-                        if "existing" in request.form and request.form["existing"] == "true":
-                            information["existing"] = True
-                        if "change" in request.form and request.form["change"] == "true":
-                            information["change"] = True
-                        if "event" in request.form and request.form["event"] == "true":
-                            information["event"] = True
-
-                    #Update goal section of the survey
-                    goal = option["goal"]
-                    if "goal" in request.form and request.form["goal"] == "Yes":
-                        if "petition" in request.form and request.form["petition"] == "true":
-                            goal["petition"] = True
-                        if "protest" in request.form and request.form["protest"] == "true":
-                            goal["protest"] = True
-                        if "denotion" in request.form and request.form["denotion"] == "true":
-                            goal["denotion"] = True
-                        if "voting" in request.form and request.form["voting"] == "true":
-                            goal["voting"] = True
-
-                    #Update Author section of the survey
-                    author = option["author"]
-                    author[request.form["org"]] = True
-
-                    #Update sentiment section of the survey
-                    link = option["link"]
-                    link[request.form["link"]] = True
-
-                    mongo.update_label(tweet_id, option, batch, tweet_nr, "guncontrol", "gunbatch", username)
                     return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr)
             except KeyError:
                 return "Bad request! You have to select an option for each question to label. Go Back!"

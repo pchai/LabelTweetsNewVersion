@@ -45,43 +45,50 @@
         <table class="table table-hover">
           <tr>
             <td><strong>Batch#</strong></td>
-            <td><strong>Owner</strong></td>
-            <td><strong>Labeled</strong></td>
+
+            <td><strong>Labelling</strong></td>
+
             <td><strong>Action</strong></td>
           </tr>
           <form action="/gun_control/pull" method="post">
             {% for i in range(0, 20)%}
               <tr>
                 <td>{{result['batch'][i]}}</td>
+
                 <td>
-                {% for e in result['owner'][i] %}
-                  < {{e}} >
-                {% endfor %}
-                </td>
-                <td>
-                {% for e in result['labeld'][i] %}
-                  {% if e != 100 %}
-                    {{e}}/100
-                  {% else %}
-                    <span class="label label-info">Finished</span>
-                  {% endif %}
-                {% endfor %}
+                {% if result['owner'][i]|length == 2 %}
+
+                  {{ result['owner'][i][0] }} ({{ result['labeld'][i][0] }}),
+                  {{ result['owner'][i][1] }} ({{ result['labeld'][i][1] }})
+                {% elif result['owner'][i]|length == 1 %}
+                  {{ result['owner'][i][0] }} ({{ result['labeld'][i][0] }})
+                {% endif %}
                 </td>
 
                 <td>
-                  {% if result['owner'][i]|length <2 %}
+                {% if result['sampling'] < 3 %}
+                  {% if result['owner'][i]|length < 2 %}
                     <label class="radio">
                       <input type="radio" name="batch" value="{{result['batch'][i]}}">
                       Pull
                     </label>
                   {% else %}
-                    <span class="label label-info">Done</span>
+                    <span class="label label-info">Taken</span>
                   {% endif %}
+                {% else %}
+                  {% if result['owner'][i]|length == 0 %}
+                    <label class="radio">
+                      <input type="radio" name="batch" value="{{result['batch'][i]}}">
+                      Pull
+                    </label>
+                  {% else %}
+                    <span class="label label-info">Taken</span>
+                  {% endif %}
+                {% endif %}
                 </td>
               </tr>
             {% endfor %}
             <tr>
-              <td></td>
               <td></td>
               <td></td>
               <td><input type="submit" class="btn btn-primary" value="Confirm"></td>
@@ -98,8 +105,8 @@
             <a href="/gun_control/mainpage/{{page-1}}">&larr; Previous</a>
           </li>
         {% endif %}
-        Page {{page}}/10
-        {% if page == 10 %}
+        Page {{page}}/5
+        {% if page == 5 %}
           <li class="next disabled">
             <a href="#">Next &rarr;</a>
           </li>

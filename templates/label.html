@@ -23,12 +23,16 @@
       Tweet Number: {{result["tweet_nr"]}}/100
       <br>
       <form action="/gun_control/label" method="POST">
-        <strong>Tweet: </strong> {{result["text"]}}<br>
+        <strong>Tweet: </strong> {{result["text"]}}
+        {% for link in result["link"] %}
+            <a href="{{link}}" target="_blank">Appended Link</a>
+        {% endfor %}
+        <br>
+        <input type="submit" name="submit" value="Not English" class="btn btn-danger btn-small"><br>
         <strong>User Name: </strong> {{result["user"]}}
         <input type="hidden" name="tweetid" value="{{result["id"]}}">
         <input type="hidden" name="batch" value="{{batch}}">
         <input type="hidden" name="tweet_nr" value="{{result["tweet_nr"]}}">
-        <input type="submit" name="submit" value="Not English" class="btn btn-danger btn-small">
         <!--Here start the surveys-->
         <h3>Topic</h3>
         Is the tweet about any of the following topic? Check all that apply.<br>
