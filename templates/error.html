@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet" media="screen">
+</head>
+
+<body>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+
+<div class="container">
+  <div class="row">
+    <h1>{{msg}}</h1>
+  </div><!--end row-->
+</div><!--end container-->
+
+</body>
+</html>

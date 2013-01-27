@@ -31,27 +31,27 @@ def signup():
                 session['username'] = mongo.valid_login(request.form["emailSignup"])
                 return render_template("select.html")
             else:
-                return "You have got a email address registered, go back and login using your email address"
+                return render_template("error.html", msg="You have got a email address registered, go back and login using your email address")
         except KeyError:
-            return "Bad Operation! You have to fill in your email address and username"
+                return render_template("error.html", msg="Bad Operation! You have to fill in your email address and username")
     else:
-        return "Bad Request! Shouldn't come here"
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
 
 @app.route("/login", methods=['POST', 'GET'])
 def login():
     if request.method == "POST":
         try:
-            if request.form["emailSignin"]:
-                if mongo.valid_login(request.form["emailSignin"]) == "NoRecord":
-                    return 'No record exists, go back and sign up'
-                else:
-                    session['username'] = mongo.valid_login(request.form["emailSignin"])
-                    return render_template("select.html")
+            if mongo.valid_login(request.form["emailSignin"]) == "NoRecord":
+                return render_template("error.html", msg="No record exists, go back an signup")
+            else:
+                session['username'] = mongo.valid_login(request.form["emailSignin"])
+                return render_template("select.html")
         except KeyError:
-            return "Bad Operation! You have to fill in your email address"
+            #return "Bad Request"
+            return render_template("error.html", msg="Bad Operation! You have to fill in your email address")
     else:
-        return "Bad Request! Shouldn't come here"
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
 
 @app.route("/select", methods=['POST', 'GET'])
@@ -61,7 +61,7 @@ def select():
             if request.form["guncontrol"] == "Gun Control":
                 return redirect(url_for('gun_mainpage'))
         except KeyError:
-            return "Bad Operation! You have to select an option"
+            return render_template("error.html", msg="Bad Request! You should select an option")
 
 
 @app.route("/gun_control/mainpage/", defaults={'page': 1})
@@ -86,11 +86,12 @@ def gun_pull():
                     mongo.add_batch(request.form["batch"], "gunbatch", email, "guncontrol")
                     return redirect(url_for('gun_mainpage'))
                 else:
-                    return 'You are not logged in'
+                    return render_template("error.html", msg="You are not logged in")
         except KeyError:
-            return 'Bad Request! You have to select a batch to pull, go back and select!'
+            return render_template("error.html", msg="Bad Request! You have to pull a batch before confirming")
+
     else:
-        return "Bad Request! Shouldn't come here"
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
 
 @app.route("/gun_control/label", methods=['POST', 'GET'])
@@ -104,12 +105,11 @@ def gun_label():
                     else:
                         return render_template("label.html")
                     batch = request.form["pull_batch"]
-                    print batch
                     tweet_nr = mongo.get_labelled(batch, "gunbatch", username)
                     result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, "guncontrol")
                     return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr)
             except KeyError:
-                return "Bad request! You have to select a f if you want to label"
+                return render_template("error.html", msg="Bad Request! You have to select a batch if you want to label")
         elif escape(request.form["submit"]) == "Not English":
             if 'username' in session:
                 username = mongo.get_username(escape(session['username']))
@@ -179,7 +179,6 @@ def gun_label():
                 #Update information section of the survey
                 information = option["information"]
                 if "information" in request.form and request.form["information"] == "Yes":
-                    print "##information ##"
                     if "fact" in request.form and request.form["fact"] == "true":
                         information["fact"] = True
                     if "existing" in request.form and request.form["existing"] == "true":
@@ -215,14 +214,14 @@ def gun_label():
                 else:
                     return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr)
             except KeyError:
-                return "Bad request! You have to select an option for each question to label. Go Back!"
+                return render_template("error.html", msg="Bad Request! You have to answer all the questions")
     else:
-        return "Bad Request! Shouldn't come here"
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
 
 if __name__ == "__main__":
     """ Connect to MongoDB """
-    mongo = MongoDBCoordinator("localhost", "LabelTweets", port=10000)
+    mongo = MongoDBCoordinator("128.122.79.158", "LabelTweets", port=10000)
     app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
     app.debug = True
-    app.run(host='128.122.79.158', port=8080)
+    app.run(host='localhost', port=8080)

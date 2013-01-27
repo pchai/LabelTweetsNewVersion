@@ -127,7 +127,6 @@ class MongoDBCoordinator:
         collection_batch = self.dbh[batchCollection]
         user = collection_member.find_one({"email": email})
         name = user.get("user_name")
-        print batch_nr
         doc = collection_batch.find_one({"batch": int(batch_nr)})
         owner = doc["owner"]
         if name not in owner:
@@ -151,12 +150,12 @@ class MongoDBCoordinator:
         collection = self.dbh[myCollection]
         collection_batch = self.dbh[batchCollection]
         result = collection.find_one({"id_str": tweet_id})
-        print result
         if "label_option" in result:
-            print "Option in result"
-            collection.update({"id_str": tweet_id}, {"$set": {"label_option_extra": option}}, safe=True)
+            tweet = collection.find_one({"id_str": tweet_id})
+            label_option = tweet.get("label_option")
+            label_option.append(option)
+            collection.update({"id_str": tweet_id}, {"$set": {"label_option": label_option}}, safe=True)
         else:
-            print "Option not in result"
-            collection.update({"id_str": tweet_id}, {"$set": {"label_option": option}}, safe=True)
+            collection.update({"id_str": tweet_id}, {"$set": {"label_option": [option]}}, safe=True)
         collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner."+username: int(tweet_nr)}}, safe=True)
 
