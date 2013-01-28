@@ -80,13 +80,13 @@ def gun_mainpage(page):
 def gun_pull():
     if request.method == "POST":
         try:
-            if request.form["batch"]:
-                if 'username' in session:
-                    email = escape(session['username'])
-                    mongo.add_batch(request.form["batch"], "gunbatch", email, "guncontrol")
-                    return redirect(url_for('gun_mainpage'))
-                else:
-                    return render_template("error.html", msg="You are not logged in")
+            if 'username' in session:
+                email = escape(session['username'])
+                batch_nr = escape(request.form["batch"])
+                mongo.add_batch(batch_nr, "gunbatch", email, "guncontrol")
+                return redirect(url_for('gun_mainpage'))
+            else:
+                return render_template("error.html", msg="You are not logged in")
         except KeyError:
             return render_template("error.html", msg="Bad Request! You have to pull a batch before confirming")
 

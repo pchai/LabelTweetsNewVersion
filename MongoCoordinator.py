@@ -117,7 +117,10 @@ class MongoDBCoordinator:
         collection = self.dbh[myCollection]
         result = collection.find_one({"batch": int(batch_nr)})
         owner = result.get("owner")
-        return owner.get(user_name)
+        if owner:
+            return owner.get(user_name)
+        else:
+            return 0
 
     def add_batch(self, batch_nr, batch, email, collection):
         '''This method will update the database when you extract'''
@@ -138,9 +141,12 @@ class MongoDBCoordinator:
             if collection not in user.get("batch"):
                 collection_member.update({"email": email}, {"$set": {"batch." + collection: []}}, safe=True)
             batch_dict = user.get("batch")
-            batch_list = batch_dict[collection]
-            if batch_nr not in batch_list:
-                batch_list.append(batch_nr)
+            batch_list = batch_dict.get(collection)
+            if batch_list:
+                if batch_nr not in batch_list:
+                    batch_list.append(batch_nr)
+            else:
+                batch_list = [batch_nr]
             collection_member.update({"email": email}, {"$set": {"batch." + collection: batch_list}}, safe=True)
 
     def update_label(self, tweet_id, option, batch_nr, tweet_nr, collection, batch, username):
