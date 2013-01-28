@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title></title>
+	<title>Main Page</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
 	<link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet" media="screen">
@@ -71,8 +71,8 @@
                 </td>
 
                 <td>
-                {% if result['sampling'] < 3 %}
-                  {% if result['owner'][i]|length < 2 %}
+                {% if result['sampling'] < 20 %} <!--Here should adapt percentage-->
+                  {% if result['owner'][i]|length < 2 %}  <!--Here should adapt Fold-->
                     <label class="radio">
                       <input type="radio" name="batch" value="{{result['batch'][i]}}">
                       Pull

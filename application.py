@@ -106,6 +106,8 @@ def gun_label():
                         return render_template("label.html")
                     batch = request.form["pull_batch"]
                     tweet_nr = mongo.get_labelled(batch, "gunbatch", username)
+                    if tweet_nr == 100:
+                        return render_template("error.html", msg="Finished Batch! This batch is already been labelled")
                     result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, "guncontrol")
                     return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr)
             except KeyError:
