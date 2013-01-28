@@ -157,7 +157,6 @@ class MongoDBCoordinator:
         collection_batch = self.dbh[batchCollection]
         result = collection.find_one({"id_str": tweet_id})
         if "label_option" in result:
-<<<<<<< HEAD
             tweet = collection.find_one({"id_str": tweet_id})
             label_option = tweet.get("label_option")
             label_option.append(option)
