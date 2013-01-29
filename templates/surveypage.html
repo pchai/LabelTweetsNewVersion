@@ -18,10 +18,11 @@
 
     <form method="post" action="/process_survey" name="surveyform">
         <input type="hidden" name="survey_name" value="{{survey_name}}">
+        <table class="table">
         {% for q in questions %}
-            <label class="radio">
-                <input type="radio" name="question_nr" value="{{q['_id']}}" checked>Select to apply change to this question
-            </label>
+            <tr>
+
+            <td>
             <strong>{{q["_id"]}}. {{q["text"]}}</strong>
             {% if q["option"] == "multiple" %}
                 {% for a in q["answers"] %}
@@ -38,12 +39,21 @@
                     </label>
                 {% endfor %}
             {% endif %}
-        <hr>
+        </td>
+         <td>
+            <label class="radio">
+                <input type="radio" name="question_nr" value="{{q['_id']}}" checked>Select to apply below operation to this question
+            </label>
+            </td>
+        </tr>
         {% endfor %}
+        </table>
         <br>
         <br>
         <input type="submit" name="submit" class="btn btn-small" value="Edit Question">
         <input type="submit" name="submit" class="btn btn-small" value="Delete Question">
+        <input type="submit" name="submit" class="btn btn-small" value="Move Up">
+        <input type="submit" name="submit" class="btn btn-small" value="Move Down">
         <input type="submit" name="submit" class="btn btn-info" value="New Question">
     </form>
   </div><!--end row-->

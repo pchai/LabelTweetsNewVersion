@@ -154,6 +154,26 @@ def proces_survey():
                 else:
                     questions = survey["questions"]
                 return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+            if request.form["submit"] == "Move Up":
+                survey_name = request.form["survey_name"]
+                question_nr = request.form["question_nr"]
+                mongo.move_survey(survey_name, question_nr, "up")
+                survey = mongo.get_survey(survey_name)
+                if "questions" not in survey:
+                    questions = []
+                else:
+                    questions = survey["questions"]
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+            if request.form["submit"] == "Move Down":
+                survey_name = request.form["survey_name"]
+                question_nr = request.form["question_nr"]
+                mongo.move_survey(survey_name, question_nr, "down")
+                survey = mongo.get_survey(survey_name)
+                if "questions" not in survey:
+                    questions = []
+                else:
+                    questions = survey["questions"]
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
 
         except KeyError:
             return render_template("error.html", msg="Bad Request! Go Back")

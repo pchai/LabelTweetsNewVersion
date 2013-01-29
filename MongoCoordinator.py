@@ -230,6 +230,19 @@ class MongoDBCoordinator:
         if flag:
             collection.save(survey)
 
+    def move_survey(self, survey_name, question_nr, direction):
+        collection = self.dbh["survey"]
+        if direction == "up":
+            if int(question_nr) != 1:
+                survey = collection.find_one({"survey_name": survey_name})
+                tmp = survey["questions"][int(question_nr)-1]["_id"]
+                survey["questions"][int(question_nr)-2]["_id"] = tmp
+                survey["questions"][int(question_nr)-1]["_id"] = tmp - 1
+                collection.save(survey)
+        elif direction == "down":
+
+            pass
+
 
 
 
