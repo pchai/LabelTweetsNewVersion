@@ -1,5 +1,14 @@
-import sys
+#!/usr/bin/env python
+# encoding: utf-8
+"""
+untitled.py
 
+Created by Peihong Chai on 2013-01-28.
+# Copyright (c) , under the Simplified BSD License.
+# For more information on FreeBSD see: http://www.opensource.org/licenses/bsd-license.php
+# All rights reserved.
+"""
+import sys
 from pymongo import Connection
 from pymongo.errors import ConnectionFailure
 from pymongo import ASCENDING
@@ -16,28 +25,34 @@ class MongoDBCoordinator:
             self.mongo = Connection(self.host, self.port)
         except ConnectionFailure, e:
             sys.stderr.write("Could not connect to MongoDB: %s" % e)
-
         self.dbh = self.mongo[self.database]
         self.dbh.authenticate("root", "zn9zabgy")
 
     def valid_login(self, email):
-        myCollection = "members"
-        if myCollection not in self.dbh.collection_names():
-            self.dbh.create_collection(myCollection)
-            print "Create Collection..."
-        collection = self.dbh[myCollection]
+        if "members" not in self.dbh.collection_names():
+            self.dbh.create_collection("members")
+            print "Create Collection Members"
+        collection = self.dbh["members"]
         user = collection.find_one({"email": email})
-        if not user:
-            return "NoRecord"
+        if user == None:
+            print "User not in database"
+            return False
+        return True
+
+    def validate_signup(self, email):
+        if "members" not in self.dbh.collection_names():
+            self.dbh.create_collection("members")
+            print "Create Collection Members"
+        collection = self.dbh["members"]
+        user = collection.find_one({"email": email})
+        if user == None:
+            return True
         else:
-            return user.get("email")
+            return False
+
 
     def get_username(self, email):
-        myCollection = "members"
-        if myCollection not in self.dbh.collection_names():
-            self.dbh.create_collection(myCollection)
-            print "Create Collection..."
-        collection = self.dbh[myCollection]
+        collection = self.dbh["members"]
         user = collection.find_one({"email": email})
         if not user:
             return "NoRecord"
@@ -45,20 +60,18 @@ class MongoDBCoordinator:
             return user.get("user_name")
 
     def insert_login(self, email, user_name):
-        myCollection = "members"
-        if myCollection not in self.dbh.collection_names():
-            self.dbh.create_collection(myCollection)
+        if "members" not in self.dbh.collection_names():
+            self.dbh.create_collection("members")
             print "Create Collection..."
-        collection = self.dbh[myCollection]
+        collection = self.dbh["members"]
         collection.save({"email": email, "user_name": user_name, "batch": {}})
 
     def get_batchs(self, skip_nr, batch):
-        myCollection = batch
-        if myCollection not in self.dbh.collection_names():
-            self.dbh.create_collection(myCollection)
+        if batch not in self.dbh.collection_names():
+            self.dbh.create_collection(batch)
             for i in range(1, 101):
-                self.dbh[myCollection].insert({"batch": i, "owner": {}})
-        collection = self.dbh[myCollection]
+                self.dbh[batch].insert({"batch": i, "owner": {}})
+        collection = self.dbh[batch]
         batchs = collection.find(sort=[("batch", ASCENDING)]).skip(skip_nr * 20)
         allbatchs = collection.find(sort=[("batch", ASCENDING)])
         result = {"batch": [], "owner": [], "labeld": [], "dict": [], "sampling": 0}
@@ -164,5 +177,34 @@ class MongoDBCoordinator:
         else:
             collection.update({"id_str": tweet_id}, {"$set": {"label_option": [option]}}, safe=True)
         collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner."+username: int(tweet_nr)}}, safe=True)
+
+    def new_survey(self, survey_name):
+        if "survey" not in self.dbh.collection_names():
+            self.dbh.create_collection("survey")
+        print "Create Collection Survey"
+        collection = self.dbh["survey"]
+        survey = collection.find_one({"survey_name": survey_name})
+        if survey is not None:
+            return False
+        collection.save({"survey_name": survey_name})
+        return True
+
+    def exist_survey(self):
+        if "survey" not in self.dbh.collection_names():
+            self.dbh.create_collection("survey")
+        print "Create Collection Survey"
+        collection = self.dbh["survey"]
+        data = collection.find()
+        result = []
+        for d in data:
+            result.append(d.get("survey_name"))
+        return result
+
+    def get_survey(self, survey_name):
+        collection = self.dbh["survey"]
+        survey = collection.find_one({"survey_name": survey_name})
+        return survey
+
+
 
 

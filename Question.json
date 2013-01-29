@@ -1,0 +1,17 @@
+{
+    "survey_name": "guncontrol",
+    "questions": [
+        {
+            "question_nr" : 1,
+            "option": "multiple",
+            "text": "balbla",
+            "answer": [{"answer_nr": 1, "text":"blabla"}, {"answer_nr": 2, "text":"blabla"}]
+        },
+        {
+            "question_nr" : 2,
+            "option": "multiple",
+            "text": "balbla",
+            "answer": [{"answer_nr": 1, "text":"blabla"}, {"answer_nr": 2, "text":"blabla"}]
+        }
+    ]
+}

@@ -1,8 +1,17 @@
+#!/usr/bin/env python
+# encoding: utf-8
+"""
+untitled.py
+
+Created by Peihong Chai on 2013-01-28.
+# Copyright (c) , under the Simplified BSD License.
+# For more information on FreeBSD see: http://www.opensource.org/licenses/bsd-license.php
+# All rights reserved.
+"""
 import simplejson as json
 
 from flask import Flask
 from flask import render_template
-
 from flask import session, redirect, url_for, escape, request
 
 from MongoCoordinator import MongoDBCoordinator
@@ -17,7 +26,7 @@ def gun_label_helper():
     return data
 
 
-@app.route("/hello")
+@app.route("/")
 def hello():
     return render_template('hello.html')
 
@@ -26,9 +35,9 @@ def hello():
 def signup():
     if request.method == "POST":
         try:
-            if mongo.valid_login(request.form["emailSignup"]) == "NoRecord":
+            if mongo.validate_signup(escape(request.form["emailSignup"])):
                 mongo.insert_login(request.form["emailSignup"], request.form["userName"])
-                session['username'] = mongo.valid_login(request.form["emailSignup"])
+                session['username'] = escape(request.form["emailSignup"])
                 return render_template("select.html")
             else:
                 return render_template("error.html", msg="You have got a email address registered, go back and login using your email address")
@@ -42,13 +51,12 @@ def signup():
 def login():
     if request.method == "POST":
         try:
-            if mongo.valid_login(request.form["emailSignin"]) == "NoRecord":
-                return render_template("error.html", msg="No record exists, go back an signup")
-            else:
-                session['username'] = mongo.valid_login(request.form["emailSignin"])
+            if mongo.valid_login(escape(request.form["emailSignin"])):
+                session['username'] = escape(request.form["emailSignin"])
                 return render_template("select.html")
+            else:
+                return render_template("error.html", msg="No record exists, go back an signup")
         except KeyError:
-            #return "Bad Request"
             return render_template("error.html", msg="Bad Operation! You have to fill in your email address")
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
@@ -93,6 +101,30 @@ def gun_pull():
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
+@app.route("/survey")
+def survey():
+    if 'username' in session:
+        result = mongo.exist_survey()
+        return render_template("survey.html", result=result)
+    else:
+        return render_template("error.html", msg="You are not logged in")
+
+@app.route("/process_survey", methods=["POST", "GET"])
+def proces_survey():
+    if request.method == "POST":
+        try:
+            if escape(request.form["submit"]) == "Create":
+                if mongo.new_survey(escape(request.form["survey"])):
+                    return redirect(url_for('survey'))
+                else:
+                    return render_template("error.html", msg="Bad Request! Survey name already exists")
+            if escape(request.form["submit"]) == "Edit":
+                survey = mongo.get_survey(escape(request.form["exist_survey"]))
+                return render_template("surveypage.html", survey=survey)
+        except KeyError:
+            return render_template("error.html", msg="Bad Request! Go Back")
+    else:
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
 @app.route("/gun_control/label", methods=['POST', 'GET'])
 def gun_label():
