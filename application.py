@@ -101,6 +101,7 @@ def gun_pull():
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
+
 @app.route("/survey")
 def survey():
     if 'username' in session:
@@ -113,16 +114,78 @@ def survey():
 def proces_survey():
     if request.method == "POST":
         try:
-            if escape(request.form["submit"]) == "Create":
-                if mongo.new_survey(escape(request.form["survey"])):
+            if request.form["submit"] == "Create":
+                if mongo.new_survey(request.form["survey"]):
                     return redirect(url_for('survey'))
                 else:
                     return render_template("error.html", msg="Bad Request! Survey name already exists")
-            if escape(request.form["submit"]) == "Edit":
-                survey = mongo.get_survey(escape(request.form["exist_survey"]))
-                return render_template("surveypage.html", survey=survey)
+            if request.form["submit"] == "Edit":
+                survey = mongo.get_survey(request.form["exist_survey"])
+                survey_name = survey["survey_name"]
+                if "questions" not in survey:
+                    questions = []
+                else:
+                    questions = survey["questions"]
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+            if request.form["submit"] == "New Question":
+                survey_name = request.form["survey_name"]
+                survey = mongo.get_survey(survey_name)
+                if "questions" not in survey:
+                    question_nr = 1
+                else:
+                    question_nr = len(survey["questions"]) + 1
+                return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr)
+            if request.form["submit"] == "Edit Question":
+                survey_name = request.form["survey_name"]
+                question_nr = request.form["question_nr"]
+                survey = mongo.get_survey(survey_name)
+                question = survey["questions"][int(question_nr)-1]
+                answers = ""
+                for a in question["answers"]:
+                    answers += a["text"] + "\n"
+                return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr, question=question, answers=answers)
+            if request.form["submit"] == "Delete Question":
+                survey_name = request.form["survey_name"]
+                question_nr = request.form["question_nr"]
+                mongo.delete_survey(survey_name, question_nr)
+                survey = mongo.get_survey(survey_name)
+                if "questions" not in survey:
+                    questions = []
+                else:
+                    questions = survey["questions"]
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+
         except KeyError:
             return render_template("error.html", msg="Bad Request! Go Back")
+    else:
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
+
+@app.route("/build_survey", methods=["POST", "GET"])
+def build_survey():
+    if request.method == "POST":
+        try:
+            if request.form["submit"] == "Finish":
+                question_text = request.form["question"].strip()
+                print question_text
+                answer_text = request.form["answers"].strip()
+                option = request.form["option"]
+                answers = answer_text.split("\n")
+                survey_name = request.form["survey_name"]
+                question_nr = request.form["question_nr"]
+                lst = []
+                for a in answers:
+                    if a != "":
+                        lst.append({"answer_nr": answers.index(a), "text": a.strip("\r")})
+                question = {"_id": int(question_nr), "option": option, "text": question_text, "answers": lst}
+                mongo.update_survey(survey_name, question)
+                survey = mongo.get_survey(survey_name)
+                if "questions" not in survey:
+                    questions = []
+                else:
+                    questions = survey["questions"]
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+        except KeyError:
+            return render_template("error.html", msg="Bad Request! You have to fill in the question and answer")
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
@@ -258,4 +321,4 @@ if __name__ == "__main__":
     mongo = MongoDBCoordinator("localhost", "LabelTweets", port=10000)
     app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
     app.debug = True
-    app.run(host='128.122.79.158', port=8080)
+    app.run(host='localhost', port=8080)

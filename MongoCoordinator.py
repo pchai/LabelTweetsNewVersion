@@ -205,6 +205,31 @@ class MongoDBCoordinator:
         survey = collection.find_one({"survey_name": survey_name})
         return survey
 
+    def update_survey(self, survey_name, question):
+        collection = self.dbh["survey"]
+        survey = collection.find_one({"survey_name": survey_name})
+        flag = False
+        for q in survey["questions"]:
+            if q["_id"] == question["_id"]:
+                survey["questions"][survey["questions"].index(q)] = question
+                flag = True
+        if flag:
+            collection.save(survey)
+        else:
+            collection.update({"survey_name": survey_name}, {"$push": {"questions": question}}, upsert=True)
+
+    def delete_survey(self, survey_name, question_nr):
+        collection = self.dbh["survey"]
+        collection.update({"survey_name": survey_name}, {"$pull": {"questions": {"_id": int(question_nr)}}})
+        survey = collection.find_one({"survey_name": survey_name})
+        flag = False
+        for q in survey["questions"]:
+            if q["_id"] > int(question_nr):
+                survey["questions"][survey["questions"].index(q)]["_id"] -= 1
+                flag = True
+        if flag:
+            collection.save(survey)
+
 
 
 

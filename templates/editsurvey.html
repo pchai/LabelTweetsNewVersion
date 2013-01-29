@@ -14,11 +14,35 @@
 
 <div class="container">
   <div class="row">
-    <h1>Create your own survey!</h1>
-    <textarea name="question" form="surveyform">Enter text here...</textarea>
-    <form method="post" action="/build" name="surveyform">
-        <input type="text" name="survey" placeholder="Enter a name for new survey...">
-        <input type="submit" class="btn btn-success" value="Create">
+    <h1>{{survey_name}}</h1>
+    <h2>Question {{question_nr}}</h2>
+    <h2>Enter the question you want to ask in below section</h2>
+    {% if question %}
+      <textarea name="question" form="build_question" rows="5">{{question["text"]}}
+      </textarea>
+    {% else %}
+      <textarea name="question" form="build_question" rows="5" placeholder="Enter the question">
+      </textarea>
+    {% endif %}
+
+    <h2>List all the possible answers to the above questions</h2>
+    <strong>Note:</strong>Put each possible answer on a line of it's own<br>
+    {% if answers %}
+      <textarea name="answers" form="build_question" rows="8">{{answers}}
+      </textarea><br>
+    {% else %}
+      <textarea name="answers" form="build_question" rows="8" placeholder="Enter the answers">
+      </textarea><br>
+    {% endif %}
+    What is the type of the question?<br>
+    <select name="option" form="build_question">
+      <option value="single">Choose one of the followings.</option>
+      <option value="multiple">Choose all that apply</option>
+    </select>
+    <form method="post" action="/build_survey" id="build_question">
+      <input type="hidden" name="survey_name" value="{{survey_name}}">
+      <input type="hidden" name="question_nr" value="{{question_nr}}">
+      <input type="submit" name="submit" class="btn btn-info" value="Finish">
     </form>
   </div><!--end row-->
 </div><!--end container-->

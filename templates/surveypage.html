@@ -14,18 +14,37 @@
 
 <div class="container">
   <div class="row">
-    <h1>{{survey["survey_name"]}}</h1>
+    <h1>{{survey_name}}</h1>
 
-    <form method="post" action="/build" name="surveyform">
-        <input type="submit" name="submit" class="btn" value="Insert a question">
-        <input type="submit" name="submit" class="btn" value="Edit">
-        <input type="submit" name="submit" class="btn" value="Delete">
-
-        <!--Here display all the existing questions and answers-->
-
+    <form method="post" action="/process_survey" name="surveyform">
+        <input type="hidden" name="survey_name" value="{{survey_name}}">
+        {% for q in questions %}
+            <label class="radio">
+                <input type="radio" name="question_nr" value="{{q['_id']}}" checked>Select to apply change to this question
+            </label>
+            <strong>{{q["_id"]}}. {{q["text"]}}</strong>
+            {% if q["option"] == "multiple" %}
+                {% for a in q["answers"] %}
+                    <label class="checkbox">
+                        <input type="checkbox" value="">
+                        {{a["text"]}}
+                    </label>
+                {% endfor %}
+            {% else %}
+                {% for a in q["answers"] %}
+                    <label class="radio">
+                        <input type="radio" name="radio" value="">
+                        {{a["text"]}}
+                    </label>
+                {% endfor %}
+            {% endif %}
+        <hr>
+        {% endfor %}
         <br>
         <br>
-        <input type="submit" name="submit" class="btn btn-info" value="Add a question below">
+        <input type="submit" name="submit" class="btn btn-small" value="Edit Question">
+        <input type="submit" name="submit" class="btn btn-small" value="Delete Question">
+        <input type="submit" name="submit" class="btn btn-info" value="New Question">
     </form>
   </div><!--end row-->
 </div><!--end container-->
