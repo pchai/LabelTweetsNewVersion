@@ -166,7 +166,7 @@ class MongoDBCoordinator:
                 batch_list = [batch_nr]
             collection_member.update({"email": email}, {"$set": {"batch." + collection: batch_list}}, safe=True)
 
-    def update_label(self, tweet_id, option, batch_nr, tweet_nr, collection, batch, username):
+    def update_label(self, tweet_id, survey, batch_nr, tweet_nr, collection, batch, username):
         '''This method will upinsert the labelling of the tweet'''
         myCollection = collection
         batchCollection = batch
@@ -176,16 +176,19 @@ class MongoDBCoordinator:
         if "label_option" in result:
             tweet = collection.find_one({"id_str": tweet_id})
             label_option = tweet.get("label_option")
-            label_option.append(option)
+            temp = {}
+            temp["user"] = username
+            temp["survey"] = survey
+            label_option.append(temp)
             collection.update({"id_str": tweet_id}, {"$set": {"label_option": label_option}}, safe=True)
         else:
-            collection.update({"id_str": tweet_id}, {"$set": {"label_option": [option]}}, safe=True)
+            collection.update({"id_str": tweet_id}, {"$set": {"label_option": [{"user": username, "survey":survey}]}}, safe=True)
         collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner."+username: int(tweet_nr)}}, safe=True)
 
     def new_survey(self, survey_name):
         if "survey" not in self.dbh.collection_names():
             self.dbh.create_collection("survey")
-        print "Create Collection Survey"
+            print "Create Collection Survey"
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name": survey_name})
         if survey is not None:
@@ -193,10 +196,14 @@ class MongoDBCoordinator:
         collection.save({"survey_name": survey_name}, safe=True)
         return True
 
+    def drop_survey(self, survey_name):
+        collection = self.dbh["survey"]
+        collection.remove({"survey_name": survey_name})
+
     def exist_survey(self):
         if "survey" not in self.dbh.collection_names():
             self.dbh.create_collection("survey")
-        print "Create Collection Survey"
+            print "Create Collection Survey"
         collection = self.dbh["survey"]
         data = collection.find()
         result = []
@@ -207,18 +214,20 @@ class MongoDBCoordinator:
     def get_survey(self, survey_name):
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name": survey_name})
-        survey["questions"] = sorted(survey["questions"], key=itemgetter('_id'))
-        collection.save(survey, safe=True)
+        if "questions" in survey:
+            survey["questions"] = sorted(survey["questions"], key=itemgetter('_id'))
+            collection.save(survey, safe=True)
         return survey
 
     def update_survey(self, survey_name, question):
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name": survey_name})
         flag = False
-        for q in survey["questions"]:
-            if q["_id"] == question["_id"]:
-                survey["questions"][survey["questions"].index(q)] = question
-                flag = True
+        if "questions" in survey:
+            for q in survey["questions"]:
+                if q["_id"] == question["_id"]:
+                    survey["questions"][survey["questions"].index(q)] = question
+                    flag = True
         if flag:
             collection.save(survey, safe=True)
         else:
@@ -241,6 +250,7 @@ class MongoDBCoordinator:
         if direction == "up":
             survey = collection.find_one({"survey_name": survey_name})
             if int(question_nr) != 1:
+                print "Enter up"
                 tmp = survey["questions"][int(question_nr)-2]["_id"]
                 survey["questions"][int(question_nr)-2]["_id"] = survey["questions"][int(question_nr)-1]["_id"]
                 survey["questions"][int(question_nr)-1]["_id"] = tmp
@@ -248,7 +258,7 @@ class MongoDBCoordinator:
         elif direction == "down":
             survey = collection.find_one({"survey_name": survey_name})
             if int(question_nr) != len(survey["questions"]):
-                survey = collection.find_one({"survey_name": survey_name})
+                print "Enter down"
                 tmp = survey["questions"][int(question_nr)-1]["_id"]
                 survey["questions"][int(question_nr)-1]["_id"] = survey["questions"][int(question_nr)]["_id"]
                 survey["questions"][int(question_nr)]["_id"] = tmp
@@ -258,7 +268,7 @@ class MongoDBCoordinator:
         #Add log information about who edited the survey
         if survey_log not in self.dbh.collection_names():
             self.dbh.create_collection(survey_log)
-        print "Create Collection Survey Log"
+            print "Create Collection Survey Log"
         collection = self.dbh[survey_log]
         now = str(datetime.datetime.now())
         doc = {"create_at": now, "user": user, "msg":msg}
@@ -266,6 +276,9 @@ class MongoDBCoordinator:
 
     def get_survey_log(self, survey_log):
         #Get all the survey log
+        if survey_log not in self.dbh.collection_names():
+            self.dbh.create_collection(survey_log)
+            print "Create Collection Survey Log"
         collection = self.dbh[survey_log]
         data = collection.find(sort=[("create_at", DESCENDING)]).limit(10)
         return data

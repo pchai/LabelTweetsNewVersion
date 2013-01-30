@@ -40,138 +40,31 @@
             <a href="{{link}}" target="_blank">Appended Link</a>
         {% endfor %}
         <br>
-        <input type="submit" name="submit" value="Not English" class="btn btn-danger btn-small" data-loading-text="Loading..."><br>
+        <input type="submit" name="submit" value="SPAM Tweet" class="btn btn-danger btn-small"><br>
         <strong>User Name: </strong> {{result["user"]}}
         <input type="hidden" name="tweetid" value="{{result["id"]}}">
         <input type="hidden" name="batch" value="{{batch}}">
         <input type="hidden" name="tweet_nr" value="{{result["tweet_nr"]}}">
         <!--Here start the surveys-->
-        <h3>Topic</h3>
-        <strong>Is the tweet about any of the following topic? Check all that apply.</strong><br>
-        <div class="btn-group" data-toggle="buttons-checkbox">
-            <input type="button" class="btn" name="newtown" value="Newtown Massacre"  data-toggle="collapse" data-target="#newtown">
-            <input type="button" class="btn" name="guncontrol" value="Gun Control" data-toggle="collapse" data-target="#guncontrol">
-            <input type="button" class="btn" name="nra" value="NRA" data-toggle="collapse" data-target="#nra">
-            <input type="button" class="btn" name="unsure" value="Not Sure">
-        </div>
-
-        <div id="newtown" class="collapse">
-            <strong>You chose Newtown Massacre. What is the sentiment of Newtown Massacre?</strong><br>
-            &nbsp;
-            <input type="radio" name="newtown" value="pro">
-            &nbsp;Pro&nbsp;&nbsp;
-            <input type="radio" name="newtown" value="con">
-            &nbsp;Con&nbsp;&nbsp;
-            <input type="radio" name="newtown" value="neutral">
-            &nbsp;Neutral
-        </div>
-        <div id="guncontrol" class="collapse">
-            <strong>You chose Gun Control. What is the sentiment of Gun Control?</strong><br>
-            &nbsp;
-            <input type="radio" name="guncontrol" value="pro">
-            &nbsp;Pro&nbsp;&nbsp;
-            <input type="radio" name="guncontrol" value="con">
-            &nbsp;Con&nbsp;&nbsp;
-            <input type="radio" name="guncontrol" value="neutral">
-            &nbsp;Neutral
-        </div>
-        <div id="nra" class="collapse">
-            <strong>You chose NRA. What is the sentiment of NRA?</strong><br>
-            &nbsp;
-            <input type="radio" name="nra" value="pro">
-            &nbsp;Pro&nbsp;&nbsp;
-            <input type="radio" name="nra" value="con">
-            &nbsp;Con&nbsp;&nbsp;
-            <input type="radio" name="nra" value="neutral">
-            &nbsp;Neutral
-        </div>
-
-        <br>
-        <h3>Emotion</h3>
-        <strong>Does this tweet contain any emotion appeal?</strong><br>
-        <input type="radio"  name="emotion" value="Yes"  data-toggle="collapse" data-target="#emotion">&nbsp;Yes&nbsp;&nbsp;
-        <input type="radio" name="emotion" value="No">&nbsp;No&nbsp;&nbsp;
-        <div id="emotion" class="collapse">
-            <strong>If yes, which emotion(s)? Check all that apply</strong><br>
-            &nbsp;
-            <input type="checkbox" name="anger" value="true">
-                &nbsp;Anger/Moral Outage&nbsp;&nbsp;
-            <input type="checkbox" name="sad" value="true">
-                &nbsp;Sadness/Sympathy&nbsp;&nbsp;
-            <input type="checkbox" name="sympathy" value="true">
-                &nbsp;Fear/Threat
-            <input type="checkbox" name="groupidentity" value="true">
-                &nbsp;Does it express group identity?
-        </div>
-        <br>
-        <h3>Information</h3>
-        <strong>Does this tweet contain an information appeal?</strong><br>
-        <input type="radio" name="information" value="Yes"  data-toggle="collapse" data-target="#information">&nbsp;Yes&nbsp;&nbsp;
-        <input type="radio" name="information" value="No">&nbsp;No&nbsp;&nbsp;
-        <div id="information" class="collapse">
-            <strong>If yes, what kinds of information? Check all that apply</strong><br>
-            &nbsp;
-            <input type="checkbox" name="fact" value="true">
-                &nbsp;Information about facts/figures/statistics.<br>
-            &nbsp;
-            <input type="checkbox" name="existing" value="true">
-                &nbsp;Information about existing laws or policies.<br>
-            &nbsp;
-            <input type="checkbox" name="change" value="true">
-                &nbsp;Information about possible changes in law or policies.<br>
-            &nbsp;
-            <input type="checkbox" name="event" value="true">
-                &nbsp;Information about a political event.
-        </div>
-        <br>
-
-        <h3>Message Goal</h3>
-        <strong>Does this tweet contain an explicit call to action?</strong><br>
-        <input type="radio" name="goal" value="Yes"  data-toggle="collapse" data-target="#goal">
-        &nbsp;Yes&nbsp;&nbsp;
-        <input type="radio" name="goal" value="No">
-        &nbsp;No&nbsp;&nbsp;
-        <div id="goal" class="collapse">
-            <strong>If yes, what types of action? Check all that apply</strong><br>
-            &nbsp;
-            <input type="checkbox" name="petition" value="true">
-                &nbsp;Petition/Contacting politician(s)<br>
-            &nbsp;
-            <input type="checkbox" name="protest" value="true">
-                &nbsp;Protest/Demonstration<br>
-            &nbsp;
-            <input type="checkbox" name="denotion" value="true">
-                &nbsp;Monetary support/Denotion<br>
-            &nbsp;
-            <input type="checkbox" name="voting" value="true">
-                &nbsp;Voting/Decision
-        </div>
-        <h3>Author</h3>
-        <strong>Is the author of this tweet a ___?</strong><br>
-        <input type="radio" name="org" value="individual">
-        &nbsp;Private individual&nbsp;&nbsp;
-        <input type="radio" name="org" value="news">
-        &nbsp;Representative of a news organization&nbsp;&nbsp;
-        <input type="radio" name="org" value="political">
-        &nbsp;Representative of a political organization&nbsp;&nbsp;
-        <input type="radio" name="org" value="unknown">
-        &nbsp;Not Sure
-        <br>
-
-        <h3>Link</h3>
-        <strong>Which of the following did you look to answer the above questions?</strong><br>
-        <input type="radio" name="link" value="tweet">
-        &nbsp;Tweet&nbsp;&nbsp;
-        <input type="radio" name="link" value="link">
-        &nbsp;Appended Link&nbsp;&nbsp;
-        <input type="radio" name="link" value="both">
-        &nbsp;Both&nbsp;&nbsp;
-        <input type="radio" name="link" value="neither">
-        &nbsp;Neither&nbsp;&nbsp;
-        <br>
-
+        {% for q in questions %}
+            <strong>{{q["_id"]}}. {{q["text"]}}</strong>
+            {% if q["option"] == "multiple" %}
+                {% for a in q["answers"] %}
+                    <label class="checkbox">
+                        <input type="checkbox" name="{{q['_id']}}" value={{a["text"]}}>
+                        {{a["text"]}}
+                    </label>
+                {% endfor %}
+            {% else %}
+                {% for a in q["answers"] %}
+                    <label class="radio">
+                        <input type="radio" name="{{q['_id']}}" value={{a["text"]}}>
+                        {{a["text"]}}
+                    </label>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
         <!--End Survey-->
-
         <input type="submit" name="submit" value="next" class="btn btn-info btn-large">
       </form>
     {% else %}

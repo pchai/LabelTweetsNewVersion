@@ -15,16 +15,16 @@ from flask import render_template
 from flask import session, redirect, url_for, escape, request
 
 from MongoCoordinator import MongoDBCoordinator
-
+import sys
 
 app = Flask(__name__)
 
-
+'''
 def gun_label_helper():
     f = open('gun_survey.json', 'r')
     data = json.loads(f.read())
     return data
-
+'''
 
 @app.route("/")
 def hello():
@@ -76,7 +76,7 @@ def select():
 @app.route("/gun_control/mainpage/<int:page>")
 def gun_mainpage(page):
     if 'username' in session:
-        username = mongo.get_username(escape(session['username']))
+        username = mongo.get_username(session['username'])
         result = mongo.get_batchs(skip_nr=page - 1, batch="gunbatch")
         batchs = mongo.get_pull_batch(escape(session['username']), "guncontrol")
         return render_template("main.html", username=username, result=result, page=page, batchs=batchs)
@@ -105,7 +105,7 @@ def gun_pull():
 @app.route("/survey")
 def survey():
     #The main page of survey
-    lst=["chaipeihong@gmail.com"]
+    lst=["chaipeihong@gmail.com", "pc1336@nyu.edu"]
     if 'username' in session and session['username'] in lst:
         result = mongo.exist_survey()
         return render_template("survey.html", result=result)
@@ -123,14 +123,18 @@ def proces_survey():
                 else:
                     return render_template("error.html", msg="Bad Request! Survey name already exists")
             if request.form["submit"] == "Edit":
-                survey = mongo.get_survey(request.form["exist_survey"])
+                survey = mongo.get_survey(request.form["survey_name"])
                 survey_name = survey["survey_name"]
                 if "questions" not in survey:
                     questions = []
                 else:
                     questions = survey["questions"]
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
-
+                survey_log = survey_name.split(" ")[0]+"_log"
+                log = mongo.get_survey_log(survey_log)
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
+            if request.form["submit"] == "Delete":
+                mongo.drop_survey(request.form["survey_name"])
+                return redirect(url_for('survey'))
         except KeyError:
             return render_template("error.html", msg="Bad Request! Go Back")
     else:
@@ -142,41 +146,64 @@ def edit_survey():
     if request.method == "POST":
         try:
             survey_name = request.form["survey_name"]
-            question_nr = request.form["question_nr"]
             survey = mongo.get_survey(survey_name)
             if "questions" not in survey:
                 questions = []
             else:
                 questions = survey["questions"]
-            survey_log = survey_name+"_log"
+            survey_log = survey_name.split(" ")[0]+"_log"
+            username = mongo.get_username(session['username'])
             #Create New question
             if request.form["submit"] == "New Question":
                 if "questions" not in survey:
                     question_nr = 1
                 else:
                     question_nr = len(survey["questions"]) + 1
+                print "111"
+                mongo.insert_survey_log(survey_log, username, "Created a new question")
+                print "222"
                 return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr)
             #Edit an existing question
             if request.form["submit"] == "Edit Question":
+                question_nr = request.form["question_nr"]
                 question = survey["questions"][int(question_nr)-1]
                 answers = ""
                 for a in question["answers"]:
                     answers += a["text"] + "\n"
+                mongo.insert_survey_log(survey_log, username, "Edited question "+question_nr)
                 return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr, question=question, answers=answers)
             #Delete an exisitng question
             if request.form["submit"] == "Delete Question":
+                question_nr = request.form["question_nr"]
                 mongo.delete_survey(survey_name, question_nr)
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+                mongo.insert_survey_log(survey_log, username, "Deleted question "+question_nr)
+                log = mongo.get_survey_log(survey_log)
+                survey = mongo.get_survey(survey_name)
+                if "questions" not in survey:
+                    questions = []
+                else:
+                    questions = survey["questions"]
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
             #Move up an existing question
             if request.form["submit"] == "Move Up":
+                question_nr = request.form["question_nr"]
                 mongo.move_survey(survey_name, question_nr, "up")
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+                mongo.insert_survey_log(survey_log, username, "Changed the order of the questions")
+                log = mongo.get_survey_log(survey_log)
+                survey = mongo.get_survey(survey_name)
+                questions = survey["questions"]
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
             #Move down an existing question
             if request.form["submit"] == "Move Down":
+                question_nr = request.form["question_nr"]
                 mongo.move_survey(survey_name, question_nr, "down")
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+                mongo.insert_survey_log(survey_log, username, "Changed the order of the questions")
+                log = mongo.get_survey_log(survey_log)
+                survey = mongo.get_survey(survey_name)
+                questions = survey["questions"]
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
         except KeyError:
-            return render_template("error.html", msg="Bad Request! Go Back")
+            return render_template("error.html", msg="Bad Request! You have to select a question! Go Back")
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
@@ -187,7 +214,6 @@ def build_survey():
         try:
             if request.form["submit"] == "Finish":
                 question_text = request.form["question"].strip()
-                print question_text
                 answer_text = request.form["answers"].strip()
                 option = request.form["option"]
                 answers = answer_text.split("\n")
@@ -200,12 +226,16 @@ def build_survey():
                 question = {"_id": int(question_nr), "option": option, "text": question_text, "answers": lst}
                 mongo.update_survey(survey_name, question)
                 survey = mongo.get_survey(survey_name)
+                print question_text
                 if "questions" not in survey:
                     questions = []
                 else:
                     questions = survey["questions"]
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+                survey_log = survey_name.split(" ")[0]+"_log"
+                log = mongo.get_survey_log(survey_log)
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
         except KeyError:
+            print sys.exc_info()
             return render_template("error.html", msg="Bad Request! You have to fill in the question and answer")
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
@@ -213,11 +243,18 @@ def build_survey():
 @app.route("/gun_control/label", methods=['POST', 'GET'])
 def gun_label():
     if request.method == "POST":
-        if escape(request.form["submit"]) == "Go to Label":
+        #Get the survey of Gun Control
+        survey = mongo.get_survey("Gun Control")
+        if "questions" not in survey:
+            questions = []
+        else:
+            questions = survey["questions"]
+        if request.form["submit"] == "Go to Label":
+            #Enter where you left last time
             try:
                 if request.form["pull_batch"]:
                     if 'username' in session:
-                        username = mongo.get_username(escape(session['username']))
+                        username = mongo.get_username(session['username'])
                     else:
                         return render_template("label.html")
                     batch = request.form["pull_batch"]
@@ -225,15 +262,16 @@ def gun_label():
                     if tweet_nr == 100:
                         return render_template("error.html", msg="Finished Batch! This batch is already been labelled")
                     result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, "guncontrol")
-                    return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr)
+                    return render_template("label.html", batch=batch, username=escape(username), result=result, tweet_nr=tweet_nr, questions=questions)
             except KeyError:
                 return render_template("error.html", msg="Bad Request! You have to select a batch if you want to label")
-        elif escape(request.form["submit"]) == "Not English":
+        elif escape(request.form["submit"]) == "SPAM Tweet":
+            #If it is a SPAM
             if 'username' in session:
                 username = mongo.get_username(escape(session['username']))
             else:
                 return render_template("label.html")
-            option = {"not_english": True}
+            survey = [{"SPAM": True}]
             batch = request.form["batch"]
             tweet_nr = request.form["tweet_nr"]
             cong = False
@@ -243,17 +281,17 @@ def gun_label():
                 cong = False
             result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, "guncontrol")
             tweet_id = request.form["tweetid"]
-            mongo.update_label(tweet_id, option, batch, tweet_nr, "guncontrol", "gunbatch", username)
+            mongo.update_label(tweet_id, survey, batch, tweet_nr, "guncontrol", "gunbatch", username)
             if cong:
                 return render_template("cong.html")
             else:
-                return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr)
+                return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr, questions=questions)
 
         elif escape(request.form["submit"]) == "next":
+            #Continue to label next tweet and save the label information
             try:
                 if 'username' in session:
-                    username = mongo.get_username(escape(session['username']))
-
+                    username = mongo.get_username(session['username'])
                 else:
                     return render_template("label.html")
                 batch = request.form["batch"]
@@ -265,72 +303,20 @@ def gun_label():
                     cong = False
                 result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, "guncontrol")
                 tweet_id = request.form["tweetid"]
-                option = gun_label_helper()
-                #Update topic section of the survey
-                #Update sentiment section of the survey
-                topic = option["topic"]
-                sentiment = option["sentiment"]
-                if "newtown" in request.form:
-                    topic["newtown"] = True
-                    sentiment["newtown"][request.form["newtown"]] = True
-                if "guncontrol" in request.form:
-                    topic["guncontrol"] = True
-                    sentiment["guncontrol"][request.form["guncontrol"]] = True
-                if "nra" in request.form:
-                    topic["nra"] = True
-                    sentiment["nra"][request.form["nra"]] = True
-                if "unsure" in request.form:
-                    topic["unsure"] = True
-
-                #Update emotion section of the survey
-                emotion = option["emotion"]
-                if "emotion" in request.form and request.form["emotion"] == "Yes":
-                    if "anger" in request.form and request.form["anger"] == "true":
-                        emotion["anger"] = True
-                    if "sad" in request.form and request.form["sad"] == "true":
-                        emotion["sad"] = True
-                    if "sympathy" in request.form and request.form["sympathy"] == "true":
-                        emotion["sympathy"] = True
-                    if "groupidentity" in request.form and request.form["groupidentity"] == "true":
-                        emotion["groupidentity"] = True
-
-                #Update information section of the survey
-                information = option["information"]
-                if "information" in request.form and request.form["information"] == "Yes":
-                    if "fact" in request.form and request.form["fact"] == "true":
-                        information["fact"] = True
-                    if "existing" in request.form and request.form["existing"] == "true":
-                        information["existing"] = True
-                    if "change" in request.form and request.form["change"] == "true":
-                        information["change"] = True
-                    if "event" in request.form and request.form["event"] == "true":
-                        information["event"] = True
-
-                #Update goal section of the survey
-                goal = option["goal"]
-                if "goal" in request.form and request.form["goal"] == "Yes":
-                    if "petition" in request.form and request.form["petition"] == "true":
-                        goal["petition"] = True
-                    if "protest" in request.form and request.form["protest"] == "true":
-                        goal["protest"] = True
-                    if "denotion" in request.form and request.form["denotion"] == "true":
-                        goal["denotion"] = True
-                    if "voting" in request.form and request.form["voting"] == "true":
-                        goal["voting"] = True
-
-                #Update Author section of the survey
-                author = option["author"]
-                author[request.form["org"]] = True
-
-                #Update sentiment section of the survey
-                link = option["link"]
-                link[request.form["link"]] = True
-
-                mongo.update_label(tweet_id, option, batch, tweet_nr, "guncontrol", "gunbatch", username)
+                survey = []
+                for q in questions:
+                    tmp = {}
+                    tmp["question"] = q["text"]
+                    tmp["answer"] = []
+                    answer = request.form.getlist(str(q["_id"]))
+                    for a in answer:
+                        tmp["answer"].append(a)
+                    survey.append(tmp)
+                mongo.update_label(tweet_id, survey, batch, tweet_nr, "guncontrol", "gunbatch", username)
                 if cong:
                     return render_template("cong.html")
                 else:
-                    return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr)
+                    return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr,questions=questions)
             except KeyError:
                 return render_template("error.html", msg="Bad Request! You have to answer all the questions")
     else:

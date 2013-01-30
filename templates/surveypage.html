@@ -31,7 +31,7 @@
 <div class="container" style="padding-top:50px">
   <div class="row">
     <h1>{{survey_name}}</h1>
-    <div class="span9">
+    <div class="span8">
     <form method="post" action="/edit_survey" name="surveyform">
         <input type="hidden" name="survey_name" value="{{survey_name}}">
         <table class="table">
@@ -58,7 +58,7 @@
         </td>
          <td>
             <label class="radio">
-                <input type="radio" name="question_nr" value="{{q['_id']}}" checked>Select to apply below operation to this question
+                <input type="radio" name="question_nr" value="{{q['_id']}}">Select to apply below operation to this question
             </label>
             </td>
         </tr>
@@ -73,8 +73,10 @@
         <input type="submit" name="submit" class="btn btn-info" value="New Question">
     </form>
     </div>
-    <div class="span3">
-        Blabla
+    <div class="span4" style="background-color: #e4e7eb">
+        {% for l in log %}
+            <strong>{{l["user"]}}: </strong>{{l["msg"]}} at {{l["create_at"]}}<br><br>
+        {% endfor %}
     </div>
   </div><!--end row-->
 </div><!--end container-->
