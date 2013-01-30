@@ -11,12 +11,28 @@
 <body>
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
-
-<div class="container">
+<div class="navbar navbar-inverse navbar-fixed-top" >
+    <div class="navbar-inner">
+      <div class="container">
+        <div class="nav-collapse collapse">
+          <ul class="nav">
+            <li class="active">
+              <a href="/gun_control/mainpage/">Home</a>
+            </li>
+          </ul>
+          <div class="pull-right">
+            <a class="btn btn-primary" href="/survey">Survey
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="container" style="padding-top:50px">
   <div class="row">
     <h1>{{survey_name}}</h1>
-
-    <form method="post" action="/process_survey" name="surveyform">
+    <div class="span9">
+    <form method="post" action="/edit_survey" name="surveyform">
         <input type="hidden" name="survey_name" value="{{survey_name}}">
         <table class="table">
         {% for q in questions %}
@@ -56,6 +72,10 @@
         <input type="submit" name="submit" class="btn btn-small" value="Move Down">
         <input type="submit" name="submit" class="btn btn-info" value="New Question">
     </form>
+    </div>
+    <div class="span3">
+        Blabla
+    </div>
   </div><!--end row-->
 </div><!--end container-->
 

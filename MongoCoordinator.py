@@ -12,8 +12,11 @@ import sys
 from pymongo import Connection
 from pymongo.errors import ConnectionFailure
 from pymongo import ASCENDING
+from pymongo import DESCENDING
+
 
 from operator import itemgetter
+import datetime
 
 class MongoDBCoordinator:
     """This class deal with the interaction of the
@@ -187,7 +190,7 @@ class MongoDBCoordinator:
         survey = collection.find_one({"survey_name": survey_name})
         if survey is not None:
             return False
-        collection.save({"survey_name": survey_name})
+        collection.save({"survey_name": survey_name}, safe=True)
         return True
 
     def exist_survey(self):
@@ -205,7 +208,7 @@ class MongoDBCoordinator:
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name": survey_name})
         survey["questions"] = sorted(survey["questions"], key=itemgetter('_id'))
-        collection.save(survey)
+        collection.save(survey, safe=True)
         return survey
 
     def update_survey(self, survey_name, question):
@@ -217,9 +220,9 @@ class MongoDBCoordinator:
                 survey["questions"][survey["questions"].index(q)] = question
                 flag = True
         if flag:
-            collection.save(survey)
+            collection.save(survey, safe=True)
         else:
-            collection.update({"survey_name": survey_name}, {"$push": {"questions": question}}, upsert=True)
+            collection.update({"survey_name": survey_name}, {"$push": {"questions": question}}, upsert=True, safe=True)
 
     def delete_survey(self, survey_name, question_nr):
         collection = self.dbh["survey"]
@@ -231,7 +234,7 @@ class MongoDBCoordinator:
                 survey["questions"][survey["questions"].index(q)]["_id"] -= 1
                 flag = True
         if flag:
-            collection.save(survey)
+            collection.save(survey, safe=True)
 
     def move_survey(self, survey_name, question_nr, direction):
         collection = self.dbh["survey"]
@@ -241,7 +244,7 @@ class MongoDBCoordinator:
                 tmp = survey["questions"][int(question_nr)-2]["_id"]
                 survey["questions"][int(question_nr)-2]["_id"] = survey["questions"][int(question_nr)-1]["_id"]
                 survey["questions"][int(question_nr)-1]["_id"] = tmp
-                collection.save(survey)
+                collection.save(survey, safe=True)
         elif direction == "down":
             survey = collection.find_one({"survey_name": survey_name})
             if int(question_nr) != len(survey["questions"]):
@@ -249,8 +252,21 @@ class MongoDBCoordinator:
                 tmp = survey["questions"][int(question_nr)-1]["_id"]
                 survey["questions"][int(question_nr)-1]["_id"] = survey["questions"][int(question_nr)]["_id"]
                 survey["questions"][int(question_nr)]["_id"] = tmp
-                collection.save(survey)
+                collection.save(survey, safe=True)
 
+    def insert_survey_log(self, survey_log, user, msg):
+        #Add log information about who edited the survey
+        if survey_log not in self.dbh.collection_names():
+            self.dbh.create_collection(survey_log)
+        print "Create Collection Survey Log"
+        collection = self.dbh[survey_log]
+        now = str(datetime.datetime.now())
+        doc = {"create_at": now, "user": user, "msg":msg}
+        collection.save(doc, safe="true")
 
-
+    def get_survey_log(self, survey_log):
+        #Get all the survey log
+        collection = self.dbh[survey_log]
+        data = collection.find(sort=[("create_at", DESCENDING)]).limit(10)
+        return data
 

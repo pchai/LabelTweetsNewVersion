@@ -89,8 +89,8 @@ def gun_pull():
     if request.method == "POST":
         try:
             if 'username' in session:
-                email = escape(session['username'])
-                batch_nr = escape(request.form["batch"])
+                email = session['username']
+                batch_nr = request.form["batch"]
                 mongo.add_batch(batch_nr, "gunbatch", email, "guncontrol")
                 return redirect(url_for('gun_mainpage'))
             else:
@@ -104,14 +104,17 @@ def gun_pull():
 
 @app.route("/survey")
 def survey():
-    if 'username' in session:
+    #The main page of survey
+    lst=["chaipeihong@gmail.com"]
+    if 'username' in session and session['username'] in lst:
         result = mongo.exist_survey()
         return render_template("survey.html", result=result)
     else:
-        return render_template("error.html", msg="You are not logged in")
+        return render_template("error.html", msg="You are not authorized to view the following page")
 
 @app.route("/process_survey", methods=["POST", "GET"])
 def proces_survey():
+    #All the request of survey
     if request.method == "POST":
         try:
             if request.form["submit"] == "Create":
@@ -127,54 +130,51 @@ def proces_survey():
                 else:
                     questions = survey["questions"]
                 return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+
+        except KeyError:
+            return render_template("error.html", msg="Bad Request! Go Back")
+    else:
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
+
+@app.route("/edit_survey", methods=["POST", "GET"])
+def edit_survey():
+    #All the request of editing survey is processed here
+    if request.method == "POST":
+        try:
+            survey_name = request.form["survey_name"]
+            question_nr = request.form["question_nr"]
+            survey = mongo.get_survey(survey_name)
+            if "questions" not in survey:
+                questions = []
+            else:
+                questions = survey["questions"]
+            survey_log = survey_name+"_log"
+            #Create New question
             if request.form["submit"] == "New Question":
-                survey_name = request.form["survey_name"]
-                survey = mongo.get_survey(survey_name)
                 if "questions" not in survey:
                     question_nr = 1
                 else:
                     question_nr = len(survey["questions"]) + 1
                 return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr)
+            #Edit an existing question
             if request.form["submit"] == "Edit Question":
-                survey_name = request.form["survey_name"]
-                question_nr = request.form["question_nr"]
-                survey = mongo.get_survey(survey_name)
                 question = survey["questions"][int(question_nr)-1]
                 answers = ""
                 for a in question["answers"]:
                     answers += a["text"] + "\n"
                 return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr, question=question, answers=answers)
+            #Delete an exisitng question
             if request.form["submit"] == "Delete Question":
-                survey_name = request.form["survey_name"]
-                question_nr = request.form["question_nr"]
                 mongo.delete_survey(survey_name, question_nr)
-                survey = mongo.get_survey(survey_name)
-                if "questions" not in survey:
-                    questions = []
-                else:
-                    questions = survey["questions"]
                 return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+            #Move up an existing question
             if request.form["submit"] == "Move Up":
-                survey_name = request.form["survey_name"]
-                question_nr = request.form["question_nr"]
                 mongo.move_survey(survey_name, question_nr, "up")
-                survey = mongo.get_survey(survey_name)
-                if "questions" not in survey:
-                    questions = []
-                else:
-                    questions = survey["questions"]
                 return render_template("surveypage.html", survey_name=survey_name, questions=questions)
+            #Move down an existing question
             if request.form["submit"] == "Move Down":
-                survey_name = request.form["survey_name"]
-                question_nr = request.form["question_nr"]
                 mongo.move_survey(survey_name, question_nr, "down")
-                survey = mongo.get_survey(survey_name)
-                if "questions" not in survey:
-                    questions = []
-                else:
-                    questions = survey["questions"]
                 return render_template("surveypage.html", survey_name=survey_name, questions=questions)
-
         except KeyError:
             return render_template("error.html", msg="Bad Request! Go Back")
     else:
@@ -182,6 +182,7 @@ def proces_survey():
 
 @app.route("/build_survey", methods=["POST", "GET"])
 def build_survey():
+    #Edit or create the actual question and answer
     if request.method == "POST":
         try:
             if request.form["submit"] == "Finish":
