@@ -13,6 +13,7 @@ from pymongo import Connection
 from pymongo.errors import ConnectionFailure
 from pymongo import ASCENDING
 
+from operator import itemgetter
 
 class MongoDBCoordinator:
     """This class deal with the interaction of the
@@ -203,6 +204,8 @@ class MongoDBCoordinator:
     def get_survey(self, survey_name):
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name": survey_name})
+        survey["questions"] = sorted(survey["questions"], key=itemgetter('_id'))
+        collection.save(survey)
         return survey
 
     def update_survey(self, survey_name, question):
@@ -233,15 +236,20 @@ class MongoDBCoordinator:
     def move_survey(self, survey_name, question_nr, direction):
         collection = self.dbh["survey"]
         if direction == "up":
+            survey = collection.find_one({"survey_name": survey_name})
             if int(question_nr) != 1:
-                survey = collection.find_one({"survey_name": survey_name})
-                tmp = survey["questions"][int(question_nr)-1]["_id"]
-                survey["questions"][int(question_nr)-2]["_id"] = tmp
-                survey["questions"][int(question_nr)-1]["_id"] = tmp - 1
+                tmp = survey["questions"][int(question_nr)-2]["_id"]
+                survey["questions"][int(question_nr)-2]["_id"] = survey["questions"][int(question_nr)-1]["_id"]
+                survey["questions"][int(question_nr)-1]["_id"] = tmp
                 collection.save(survey)
         elif direction == "down":
-
-            pass
+            survey = collection.find_one({"survey_name": survey_name})
+            if int(question_nr) != len(survey["questions"]):
+                survey = collection.find_one({"survey_name": survey_name})
+                tmp = survey["questions"][int(question_nr)-1]["_id"]
+                survey["questions"][int(question_nr)-1]["_id"] = survey["questions"][int(question_nr)]["_id"]
+                survey["questions"][int(question_nr)]["_id"] = tmp
+                collection.save(survey)
 
 
 
