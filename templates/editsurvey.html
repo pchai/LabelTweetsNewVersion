@@ -36,8 +36,8 @@
     {% endif %}
     What is the type of the question?<br>
     <select name="option" form="build_question">
-      <option value="single">Choose one of the followings.</option>
-      <option value="multiple">Choose all that apply</option>
+      <option value="single">Single-choice question</option>
+      <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
     </select>
     <form method="post" action="/build_survey" id="build_question">
       <input type="hidden" name="survey_name" value="{{survey_name}}">

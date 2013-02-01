@@ -23,6 +23,8 @@
           <div class="pull-right">
             <a class="btn btn-primary" href="/survey">Survey
             </a>
+            <a class="btn btn-danger" href="/logout">Logout
+            </a>
           </div>
         </div>
       </div>
@@ -41,7 +43,7 @@
         {% endfor %}
         <br>
         <input type="submit" name="submit" value="SPAM Tweet" class="btn btn-danger btn-small"><br>
-        <strong>User Name: </strong> {{result["user"]}}
+        <strong>User Name: </strong> {{result["user"]}}<br>
         <input type="hidden" name="tweetid" value="{{result["id"]}}">
         <input type="hidden" name="batch" value="{{batch}}">
         <input type="hidden" name="tweet_nr" value="{{result["tweet_nr"]}}">
@@ -51,14 +53,14 @@
             {% if q["option"] == "multiple" %}
                 {% for a in q["answers"] %}
                     <label class="checkbox">
-                        <input type="checkbox" name="{{q['_id']}}" value={{a["text"]}}>
+                        <input type="checkbox" name="{{q['_id']}}" value="{{a["text"]}}">
                         {{a["text"]}}
                     </label>
                 {% endfor %}
             {% else %}
                 {% for a in q["answers"] %}
                     <label class="radio">
-                        <input type="radio" name="{{q['_id']}}" value={{a["text"]}}>
+                        <input type="radio" name="{{q['_id']}}" value="{{a["text"]}}">
                         {{a["text"]}}
                     </label>
                 {% endfor %}

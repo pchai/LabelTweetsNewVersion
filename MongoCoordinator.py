@@ -32,11 +32,10 @@ class MongoDBCoordinator:
         self.dbh = self.mongo[self.database]
         self.dbh.authenticate("root", "zn9zabgy")
 
+
     def valid_login(self, email):
-        if "members" not in self.dbh.collection_names():
-            self.dbh.create_collection("members")
-            print "Create Collection Members"
         collection = self.dbh["members"]
+        user = None
         user = collection.find_one({"email": email})
         if user == None:
             print "User not in database"
@@ -44,10 +43,8 @@ class MongoDBCoordinator:
         return True
 
     def validate_signup(self, email):
-        if "members" not in self.dbh.collection_names():
-            self.dbh.create_collection("members")
-            print "Create Collection Members"
         collection = self.dbh["members"]
+        user = None
         user = collection.find_one({"email": email})
         if user == None:
             return True
@@ -57,6 +54,7 @@ class MongoDBCoordinator:
 
     def get_username(self, email):
         collection = self.dbh["members"]
+        user = None
         user = collection.find_one({"email": email})
         if not user:
             return "NoRecord"
@@ -64,39 +62,41 @@ class MongoDBCoordinator:
             return user.get("user_name")
 
     def insert_login(self, email, user_name):
-        if "members" not in self.dbh.collection_names():
-            self.dbh.create_collection("members")
-            print "Create Collection..."
         collection = self.dbh["members"]
-        collection.save({"email": email, "user_name": user_name, "batch": {}})
+        try:
+            collection.save({"email": email, "user_name": user_name, "batch": {}})
+            return True
+        except:
+            print "Unexpected error on insert_login:", sys.exc_info()[0]
+            return False
 
     def get_batchs(self, skip_nr, batch):
-        if batch not in self.dbh.collection_names():
-            self.dbh.create_collection(batch)
-            for i in range(1, 101):
-                self.dbh[batch].insert({"batch": i, "owner": {}})
         collection = self.dbh[batch]
-        batchs = collection.find(sort=[("batch", ASCENDING)]).skip(skip_nr * 20)
-        allbatchs = collection.find(sort=[("batch", ASCENDING)])
-        result = {"batch": [], "owner": [], "labeld": [], "dict": [], "sampling": 0}
-        sampling = 0
-        for b in allbatchs:
-            owner = b.get("owner")
-            result["dict"].append(owner)
-            if len(owner.keys()) == 2:
-                sampling = sampling + 1
-        result["sampling"] = sampling
-        for b in batchs:
-            owner = b.get("owner")
-            l1 = []
-            l2 = []
-            for k in owner.keys():
-                l1.append(k)
-                l2.append(owner[k])
-            result["batch"].append(b.get("batch"))
-            result["owner"].append(l1)
-            result["labeld"].append(l2)
-        return result
+        try:
+            batchs = collection.find(sort=[("batch", ASCENDING)]).skip(skip_nr * 20)
+            allbatchs = collection.find(sort=[("batch", ASCENDING)])
+            result = {"batch": [], "owner": [], "labeld": [], "dict": [], "sampling": 0}
+            sampling = 0
+            for b in allbatchs:
+                owner = b.get("owner")
+                result["dict"].append(owner)
+                if len(owner.keys()) == 2:
+                    sampling = sampling + 1
+            result["sampling"] = sampling
+            for b in batchs:
+                owner = b.get("owner")
+                l1 = []
+                l2 = []
+                for k in owner.keys():
+                    l1.append(k)
+                    l2.append(owner[k])
+                result["batch"].append(b.get("batch"))
+                result["owner"].append(l1)
+                result["labeld"].append(l2)
+            return result
+        except:
+            print "Unexpected error on get_batchs:", sys.exc_info()[0]
+            return {}
 
     def get_pull_batch(self, email, collection_name):
         '''This method will return all the batchs that this user has already pulled'''
@@ -111,50 +111,56 @@ class MongoDBCoordinator:
             batch_list = []
         return batch_list
 
+
     def get_tweet(self, batch_nr, tweet_nr, collection_name):
         myCollection = collection_name
         collection = self.dbh[myCollection]
-        label_counter = (batch_nr - 1) * 100 + tweet_nr
-        tweets = collection.find({"label_counter": label_counter})
-        result = {"id": "", "text": "", "label_counter": "", "user": "", "link": []}
-        for tweet in tweets:
-            result["id"] = tweet.get("id_str")
-            result["text"] = tweet.get("text")
-            result["tweet_nr"] = str(tweet_nr)
-            user = tweet.get("user")
-            result["user"] = user["screen_name"]
-            entity = tweet.get("entities")
-            urls = entity["urls"]
-            for u in urls:
-                result["link"].append(u["expanded_url"])
-        return result
+        try:
+            label_counter = (batch_nr - 1) * 100 + tweet_nr
+            tweets = collection.find({"label_counter": label_counter})
+            result = {"id": "", "text": "", "label_counter": "", "user": "", "link": []}
+            for tweet in tweets:
+                result["id"] = tweet.get("id_str")
+                result["text"] = tweet.get("text")
+                result["tweet_nr"] = str(tweet_nr)
+                user = tweet.get("user")
+                result["user"] = user["screen_name"]
+                entity = tweet.get("entities")
+                urls = entity["urls"]
+                for u in urls:
+                    result["link"].append(u["expanded_url"])
+            return result
+        except:
+            print "Unexpected error on get_tweet:", sys.exc_info()[0]
+            return {}
+
 
     def get_labelled(self, batch_nr, batch, user_name):
         myCollection = batch
         collection = self.dbh[myCollection]
-        result = collection.find_one({"batch": int(batch_nr)})
-        owner = result.get("owner")
-        if owner:
-            return owner.get(user_name)
-        else:
-            return 0
+        try:
+            result = collection.find_one({"batch": int(batch_nr)})
+            owner = result.get("owner")
+            if owner:
+                return owner.get(user_name)
+            else:
+                return 0
+        except:
+            print "Unexpected error on get_labelled:", sys.exc_info()[0]
 
     def add_batch(self, batch_nr, batch, email, collection):
         '''This method will update the database when you extract'''
-        memberCollection = "members"
-        batchCollection = batch
-        collection_member = self.dbh[memberCollection]
-        collection_batch = self.dbh[batchCollection]
-        user = collection_member.find_one({"email": email})
-        name = user.get("user_name")
-        doc = collection_batch.find_one({"batch": int(batch_nr)})
-        owner = doc["owner"]
-        if name not in owner:
-            owner[name] = 0
-        collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner": owner}}, safe=True)
-        if not user:
-            return "Couldn't add"
-        else:
+
+        collection_member = self.dbh["members"]
+        collection_batch = self.dbh[batch]
+        try:
+            user = collection_member.find_one({"email": email})
+            name = user.get("user_name")
+            doc = collection_batch.find_one({"batch": int(batch_nr)})
+            owner = doc.get("owner")
+            if name not in owner:
+                owner[name] = 0
+            collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner": owner}}, safe=True)
             if collection not in user.get("batch"):
                 collection_member.update({"email": email}, {"$set": {"batch." + collection: []}}, safe=True)
             batch_dict = user.get("batch")
@@ -165,33 +171,26 @@ class MongoDBCoordinator:
             else:
                 batch_list = [batch_nr]
             collection_member.update({"email": email}, {"$set": {"batch." + collection: batch_list}}, safe=True)
+        except:
+            print "Unexpected error on add_batch:", sys.exc_info()[0]
+            return False
+        return True
 
     def update_label(self, tweet_id, survey, batch_nr, tweet_nr, collection, batch, username):
         '''This method will upinsert the labelling of the tweet'''
-        myCollection = collection
-        batchCollection = batch
-        collection = self.dbh[myCollection]
-        collection_batch = self.dbh[batchCollection]
+        collection = self.dbh[collection]
+        collection_batch = self.dbh[batch]
         result = collection.find_one({"id_str": tweet_id})
         if "label_option" in result:
-            tweet = collection.find_one({"id_str": tweet_id})
-            label_option = tweet.get("label_option")
-            temp = {}
-            temp["user"] = username
-            temp["survey"] = survey
-            label_option.append(temp)
-            collection.update({"id_str": tweet_id}, {"$set": {"label_option": label_option}}, safe=True)
+            collection.update({"id_str": tweet_id}, {"$push": {"label_option": {"user": username, "survey":survey}}}, safe=True)
         else:
             collection.update({"id_str": tweet_id}, {"$set": {"label_option": [{"user": username, "survey":survey}]}}, safe=True)
         collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner."+username: int(tweet_nr)}}, safe=True)
 
     def new_survey(self, survey_name):
-        if "survey" not in self.dbh.collection_names():
-            self.dbh.create_collection("survey")
-            print "Create Collection Survey"
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name": survey_name})
-        if survey is not None:
+        if survey:
             return False
         collection.save({"survey_name": survey_name}, safe=True)
         return True
@@ -201,9 +200,6 @@ class MongoDBCoordinator:
         collection.remove({"survey_name": survey_name})
 
     def exist_survey(self):
-        if "survey" not in self.dbh.collection_names():
-            self.dbh.create_collection("survey")
-            print "Create Collection Survey"
         collection = self.dbh["survey"]
         data = collection.find()
         result = []
@@ -225,8 +221,9 @@ class MongoDBCoordinator:
         flag = False
         if "questions" in survey:
             for q in survey["questions"]:
+                index = survey["questions"].index(q)
                 if q["_id"] == question["_id"]:
-                    survey["questions"][survey["questions"].index(q)] = question
+                    survey["questions"][index] = question
                     flag = True
         if flag:
             collection.save(survey, safe=True)
@@ -239,8 +236,9 @@ class MongoDBCoordinator:
         survey = collection.find_one({"survey_name": survey_name})
         flag = False
         for q in survey["questions"]:
+            index = survey["questions"].index(q)
             if q["_id"] > int(question_nr):
-                survey["questions"][survey["questions"].index(q)]["_id"] -= 1
+                survey["questions"][index]["_id"] -= 1
                 flag = True
         if flag:
             collection.save(survey, safe=True)
@@ -250,7 +248,6 @@ class MongoDBCoordinator:
         if direction == "up":
             survey = collection.find_one({"survey_name": survey_name})
             if int(question_nr) != 1:
-                print "Enter up"
                 tmp = survey["questions"][int(question_nr)-2]["_id"]
                 survey["questions"][int(question_nr)-2]["_id"] = survey["questions"][int(question_nr)-1]["_id"]
                 survey["questions"][int(question_nr)-1]["_id"] = tmp
@@ -258,7 +255,6 @@ class MongoDBCoordinator:
         elif direction == "down":
             survey = collection.find_one({"survey_name": survey_name})
             if int(question_nr) != len(survey["questions"]):
-                print "Enter down"
                 tmp = survey["questions"][int(question_nr)-1]["_id"]
                 survey["questions"][int(question_nr)-1]["_id"] = survey["questions"][int(question_nr)]["_id"]
                 survey["questions"][int(question_nr)]["_id"] = tmp

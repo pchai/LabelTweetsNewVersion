@@ -23,6 +23,8 @@
           <div class="pull-right">
             <a class="btn btn-primary" href="/survey">Survey
             </a>
+            <a class="btn btn-danger" href="/logout">Logout
+            </a>
           </div>
         </div>
       </div>
@@ -33,7 +35,10 @@
     {% if username %}
       <h2 class="muted">Hi, {{ username }}</h2>
       <hr>
-      <p class="lead"><strong>The batch(s) you have pulled</strong></p>
+      <h4>Your batch(s)</h4>
+        {% if batchs|length == 0 %}
+          <span class="label">Note </span><small> You have to pull a batch from existing batchs</small><br>
+        {% endif %}
         <form action="/gun_control/label" method="post">
           {% for batch in batchs %}
           <div class="row">
@@ -58,10 +63,14 @@
           </div>
           </div>
           {% endfor %}
-          <input type="submit" name="submit" value="Go to Label" class="btn btn-success btn-large">
+          {% if batchs|length == 0 %}
+            <a class="btn btn-success btn-large disabled" href="#">Go to Label</a>
+          {% else %}
+            <input type="submit" name="submit" value="Go to Label" class="btn btn-success btn-large">
+          {% endif %}
         </form>
       <hr>
-      <p class="lead"><strong>Existing Batch</strong>
+      <h4>Existing Batches</h4>
       {% if result %}
         <table class="table table-hover">
           <tr>
