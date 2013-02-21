@@ -41,11 +41,16 @@
               Tweet Number: {{result["tweet_nr"]}}/100
               <br>
               <strong>Tweet: </strong> {{result["text"]}}
-            {% for link in result["link"] %}
+              {% for link in result["link"] %}
+              <!--
+              <button type="submit" name="appendlink" value="{{link}}" class="btn btn-small btn-link" >
+                AppendLink
+              </button>
+              -->
               <a href="{{link}}" target="_blank">Appended Link</a>
-            {% endfor %}
-            <br>
-            <strong>User Name: </strong> {{result["user"]}}<br>
+              {% endfor %}
+              <br>
+              <strong>User Name: </strong> {{result["user"]}}<br>
             </div>
           </div>
         </div>

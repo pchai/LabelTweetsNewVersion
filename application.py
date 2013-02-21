@@ -171,7 +171,8 @@ def gun_label():
 @app.route("/survey")
 def survey():
     #The main page of survey
-    if 'username' in session:
+    lst = ["joshua.tucker@nyu.edu", "bonneau@nyu.edu", "jonathan.nagler@nyu.edu", "chaipeihong@gmail.com"]
+    if 'username' in session and session['username'] in lst:
         result = mongo.exist_survey()
         return render_template("survey.html", result=result)
     else:
