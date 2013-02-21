@@ -113,7 +113,7 @@ def gun_label():
                 username = mongo.get_username(session['username'])
             else:
                 return render_template("label.html")
-            if request.form["submit"] == "Go to Label":
+            if request.form["submit"] == "Start coding":
                 #Enter where you left last time
                 batch = request.form["pull_batch"]
                 tweet_nr = mongo.get_labelled(batch, collection_batch_name, username)
@@ -124,7 +124,7 @@ def gun_label():
                     return render_template("error.html", msg="Internal Error")
 
                 return render_template("label.html", batch=batch, username=escape(username), result=result, tweet_nr=tweet_nr, questions=questions)
-            elif request.form["submit"] == "SPAM Tweet":
+            elif request.form["submit"] == "This is a spam":
                 #If it is a SPAM
                 survey = [{"SPAM": True}]
                 batch = request.form["batch"]
@@ -151,6 +151,8 @@ def gun_label():
                 for q in questions:
                     tmp = {"questions": q["text"], "answer": []}
                     answer = request.form.getlist(str(q["_id"]))
+                    if answer == []:
+                        return render_template("error.html", msg="You haven't answer question " + str(q["_id"]))
                     for a in answer:
                         tmp["answer"].append(a)
                     survey.append(tmp)
@@ -217,6 +219,11 @@ def edit_survey():
                 question_nr = len(survey["questions"]) + 1 if "questions" in survey else 1
                 mongo.insert_survey_log(survey_log, username, "Created a new question")
                 return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr)
+            #Insert a new question
+            if request.form["submit"] == "Append Question":
+                question_nr = int(request.form["question_nr"]) + 1
+                mongo.insert_survey_log(survey_log, username, "Insert a new question")
+                return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr, flag="insert")
             #Edit an existing question
             elif request.form["submit"] == "Edit Question":
                 question_nr = request.form["question_nr"]
@@ -264,25 +271,26 @@ def build_survey():
     #Edit or create the actual question and answer
     if request.method == "POST":
         try:
+            question_text = request.form["question"].strip()
+            answer_text = request.form["answers"].strip()
+            option = request.form["option"]
+            answers = answer_text.split("\n")
+            survey_name = request.form["survey_name"]
+            question_nr = request.form["question_nr"]
+            lst = []
+            for a in answers:
+                if a:
+                    lst.append({"answer_nr": answers.index(a), "text": a.strip("\r")})
+            question = {"_id": int(question_nr), "option": option, "text": question_text, "answers": lst}
             if request.form["submit"] == "Finish":
-                question_text = request.form["question"].strip()
-                answer_text = request.form["answers"].strip()
-                option = request.form["option"]
-                answers = answer_text.split("\n")
-                survey_name = request.form["survey_name"]
-                question_nr = request.form["question_nr"]
-                lst = []
-                for a in answers:
-                    if a:
-                        lst.append({"answer_nr": answers.index(a), "text": a.strip("\r")})
-                question = {"_id": int(question_nr), "option": option, "text": question_text, "answers": lst}
                 mongo.update_survey(survey_name, question)
-                survey = mongo.get_survey(survey_name)
-                print question_text
-                questions = survey["questions"] if "questions" in survey else []
-                survey_log = survey_name.split(" ")[0]+"_log"
-                log = mongo.get_survey_log(survey_log)
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
+            elif request.form["submit"] == "Insert":
+                mongo.insert_survey_question(survey_name, question_nr, question)
+            survey = mongo.get_survey(survey_name)
+            questions = survey["questions"] if "questions" in survey else []
+            survey_log = survey_name.split(" ")[0]+"_log"
+            log = mongo.get_survey_log(survey_log)
+            return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
         except KeyError:
             return render_template("error.html", msg="Bad Request! You have to fill in the question and answer")
     else:
@@ -294,4 +302,4 @@ if __name__ == "__main__":
     mongo = MongoDBCoordinator("128.122.79.158", "LabelTweets", port=10000)
     app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
     app.debug = True
-    app.run(host='128.122.79.158', port=8080)
+    app.run(host='localhost', port=8080)

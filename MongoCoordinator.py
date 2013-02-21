@@ -260,6 +260,16 @@ class MongoDBCoordinator:
                 survey["questions"][int(question_nr)]["_id"] = tmp
                 collection.save(survey, safe=True)
 
+    def insert_survey_question(self, survey_name, question_nr, question):
+        collection = self.dbh["survey"]
+        survey = collection.find_one({"survey_name": survey_name})
+        if "questions" in survey:
+            for q in survey["questions"]:
+                if q["_id"] >= int(question_nr):
+                    q["_id"] = int(q["_id"]) + 1
+            collection.save(survey, safe=True)
+            collection.update({"survey_name": survey_name}, {"$push": {"questions": question}}, upsert=True, safe=True)
+
     def insert_survey_log(self, survey_log, user, msg):
         #Add log information about who edited the survey
         if survey_log not in self.dbh.collection_names():

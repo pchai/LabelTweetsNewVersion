@@ -42,7 +42,12 @@
     <form method="post" action="/build_survey" id="build_question">
       <input type="hidden" name="survey_name" value="{{survey_name}}">
       <input type="hidden" name="question_nr" value="{{question_nr}}">
+      {% if flag == "insert" %}
+        <input type="submit" name="submit" class="btn btn-info" value="Insert">        
+      {% else %}
       <input type="submit" name="submit" class="btn btn-info" value="Finish">
+     
+      {% endif %}
     </form>
   </div><!--end row-->
 </div><!--end container-->

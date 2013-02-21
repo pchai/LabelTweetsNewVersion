@@ -11,7 +11,7 @@
 <body>
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
-<div class="navbar navbar-inverse navbar-fixed-top" >
+<div class="navbar navbar-inverse navbar-fixed-bottom" >
     <div class="navbar-inner">
       <div class="container">
         <div class="nav-collapse collapse">
@@ -21,7 +21,7 @@
             </li>
           </ul>
           <div class="pull-right">
-            <a class="btn btn-primary" href="/survey">Survey
+            <a class="btn btn-primary" href="/survey">Edit Survey
             </a>
             <a class="btn btn-danger" href="/logout">Logout
             </a>
@@ -30,20 +30,27 @@
       </div>
     </div>
 </div>
-<div class="container" style="padding-top:50px">
+<div class="container" style="padding-top:90px; padding-bottom:50px">
   <div class="row">
     {% if username %}
-      <strong>Batch {{batch}}</strong>&nbsp;&nbsp;
-      Tweet Number: {{result["tweet_nr"]}}/100
-      <br>
       <form action="/gun_control/label" method="POST">
-        <strong>Tweet: </strong> {{result["text"]}}
-        {% for link in result["link"] %}
-            <a href="{{link}}" target="_blank">Appended Link</a>
-        {% endfor %}
-        <br>
-        <input type="submit" name="submit" value="SPAM Tweet" class="btn btn-danger btn-small"><br>
-        <strong>User Name: </strong> {{result["user"]}}<br>
+        <div class="navbar navbar-fixed-top">
+          <div class="navbar-inner">
+            <div class="container">
+              <strong>Batch {{batch}}</strong>&nbsp;&nbsp;
+              Tweet Number: {{result["tweet_nr"]}}/100
+              <br>
+              <strong>Tweet: </strong> {{result["text"]}}
+            {% for link in result["link"] %}
+              <a href="{{link}}" target="_blank">Appended Link</a>
+            {% endfor %}
+            <br>
+            <strong>User Name: </strong> {{result["user"]}}<br>
+            </div>
+          </div>
+        </div>
+        <input type="submit" name="submit" value="This is a spam" class="btn btn-danger btn-small">
+        Spam: Mass Marketing, auto-generated message that includes an endorsement of a product.<br>
         <input type="hidden" name="tweetid" value="{{result["id"]}}">
         <input type="hidden" name="batch" value="{{batch}}">
         <input type="hidden" name="tweet_nr" value="{{result["tweet_nr"]}}">

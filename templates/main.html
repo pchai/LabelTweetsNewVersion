@@ -21,7 +21,7 @@
             </li>
           </ul>
           <div class="pull-right">
-            <a class="btn btn-primary" href="/survey">Survey
+            <a class="btn btn-primary" href="/survey">Edit Survey
             </a>
             <a class="btn btn-danger" href="/logout">Logout
             </a>
@@ -34,8 +34,9 @@
   <div class="row">
     {% if username %}
       <h2 class="muted">Hi, {{ username }}</h2>
+      <small>You can either pull a new batch from <code>Existing Batches</code> as your batch or you can start coding on the batches you have already pulled under <code>Your Batches</code>.</small>
       <hr>
-      <h4>Your batch(s)</h4>
+      <h4>Your batch(es)</h4>
         {% if batchs|length == 0 %}
           <span class="label">Note </span><small> You have to pull a batch from existing batchs</small><br>
         {% endif %}
@@ -64,9 +65,9 @@
           </div>
           {% endfor %}
           {% if batchs|length == 0 %}
-            <a class="btn btn-success btn-large disabled" href="#">Go to Label</a>
+            <a class="btn btn-success btn-large disabled" href="#">Start coding</a>
           {% else %}
-            <input type="submit" name="submit" value="Go to Label" class="btn btn-success btn-large">
+            <input type="submit" name="submit" value="Start coding" class="btn btn-success btn-large">
           {% endif %}
         </form>
       <hr>

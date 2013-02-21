@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet" media="screen">
+    <script>
+	function goBack()
+  {
+  	window.history.back()
+  }
+</script>
 </head>
 
 <body>
@@ -15,6 +21,7 @@
 <div class="container">
   <div class="row">
     <h1>{{msg}}</h1>
+    <a onclick="goBack()">Go Back!</a>
   </div><!--end row-->
 </div><!--end container-->
 
