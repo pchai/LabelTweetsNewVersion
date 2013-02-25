@@ -17,7 +17,7 @@
         <div class="nav-collapse collapse">
           <div class="pull-right">
             <a class="btn btn-primary" href="/survey">Edit Survey
-            </a>  
+            </a>
             <a class="btn btn-danger" href="/logout">Logout
             </a>
           </div>
@@ -30,9 +30,16 @@
     <h1>Please choose the topic you want to start labelling</h1>
     <form action="/select" method="POST">
         {% for r in result%}
-        <button type="submit" class="btn btn-large btn-info" name="survey" value="{{r['survey_name']}}">
+          {% if r['lock'] == True %}
+            <a class="btn btn-large btn-info disabled" href="#">
             {{r["survey_name"]}}
-        </button>
+            </a>
+            <span class="label label-important">Locked</span>
+          {% else %}
+            <button type="submit" class="btn btn-large btn-info" name="survey" value="{{r['survey_name']}}">
+            {{r["survey_name"]}}
+            </button>
+          {%endif%}
         {% endfor %}
     </form>
     </div>

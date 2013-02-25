@@ -121,7 +121,7 @@ def start_coding():
                 batch = request.form["pull_batch"]
                 tweet_nr = mongo.get_labelled(batch, collection_batch_name, username)
                 if tweet_nr == tweets_per_batch:
-                    return render_template("error.html", msg="Finished Batch! This batch is already been labelled")
+                    return render_template("error.html", msg="Finished Batch! All the tweets in this batch has been labelled")
                 result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, collection_tweet_name)
                 if not result:
                     return render_template("error.html", msg="Internal Error")
@@ -156,8 +156,8 @@ def gun_label():
             if 'username' in session:
                 username = mongo.get_username(session['username'])
             else:
-                return render_template("label.html")                
-            
+                return render_template("label.html")
+
             if request.form["submit"] == "This is a spam":
                 #If it is a SPAM
                 survey = [{"SPAM": True}]
@@ -172,7 +172,7 @@ def gun_label():
                     return render_template("cong.html")
                 else:
                     return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr, questions=questions)
-           
+
             elif escape(request.form["submit"]) == "next":
                 #Continue to label next tweet and save the label information
 
@@ -198,7 +198,7 @@ def gun_label():
                     for a in answer:
                         tmp["answer"].append(a)
                     survey.append(tmp)
-                    prev = q["_id"] 
+                    prev = q["_id"]
                 mongo.update_label(tweet_id, survey, batch, tweet_nr, collection_tweet_name, collection_batch_name, username)
                 if int(tweet_nr) == tweets_per_batch:
                     return render_template("cong.html")
