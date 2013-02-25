@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Link</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet" media="screen">
+    <script>
+	function goBack()
+  {
+  	window.history.back()
+  }
+</script>
+</head>
+
+<body>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+
+<div class="container">
+  <div class="row">
+    <iframe height="800" width="100%" src="{{link}}"sandbox="allow-top-navigation allow-same-origin">
+        <p>Your browser does not support iframes. Go Back</p>
+    </iframe>
+  </div>
+</div><!--end container-->
+
+</body>
+</html>

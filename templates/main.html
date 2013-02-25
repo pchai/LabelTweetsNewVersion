@@ -34,13 +34,13 @@
   <div class="row">
     {% if username %}
       <h2 class="muted">Hi, {{ username }}</h2>
-      <small>You can either pull a new batch from <code>Existing Batches</code> as your batch or you can start coding on the batches you have already pulled under <code>Your Batches</code>.</small>
+      {{description}}
       <hr>
       <h4>Your batch(es)</h4>
         {% if batchs|length == 0 %}
           <span class="label">Note </span><small> You have to pull a batch from existing batchs</small><br>
         {% endif %}
-        <form action="/gun_control/label" method="post">
+        <form action="/gun_control/startconding" method="post">
           {% for batch in batchs %}
           <div class="row">
           <div class="span2">

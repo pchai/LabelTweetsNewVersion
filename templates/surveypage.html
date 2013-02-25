@@ -34,7 +34,14 @@
   <div class="row">
     <h1>{{survey_name}}</h1>
     <div class="span8">
+    <form method="post" action="/edit_survey/description" id="description_form">
+        <input type="hidden" name="survey_name" value="{{survey_name}}">
+        <textarea name="description" form="description_form" rows="5" cols="50">{{description}}
+        </textarea>
+        <input type="submit" name="submit" class="btn btn-small" value="Update Description">
+    </form>
     <form method="post" action="/edit_survey" name="surveyform">
+        <br>
         <input type="hidden" name="survey_name" value="{{survey_name}}">
         <table class="table">
         {% for q in questions %}

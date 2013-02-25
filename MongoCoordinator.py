@@ -229,6 +229,15 @@ class MongoDBCoordinator:
             collection.save(survey, safe=True)
         else:
             collection.update({"survey_name": survey_name}, {"$push": {"questions": question}}, upsert=True, safe=True)
+    
+    def update_description(self, survey_name, description):
+        collection = self.dbh["survey"]
+        collection.update({"survey_name": survey_name}, {"$set":{"description": description}})
+        
+    def get_description(self, survey_name):
+        collection = self.dbh["survey"]
+        survey = collection.find_one({"survey_name":survey_name})
+        return survey["description"]
 
     def delete_survey(self, survey_name, question_nr):
         collection = self.dbh["survey"]

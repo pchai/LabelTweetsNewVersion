@@ -33,7 +33,7 @@
 <div class="container" style="padding-top:90px; padding-bottom:50px">
   <div class="row">
     {% if username %}
-      <form action="/gun_control/label" method="POST">
+      <form action="/gun_control/links" method="POST">
         <div class="navbar navbar-fixed-top">
           <div class="navbar-inner">
             <div class="container">
@@ -42,18 +42,21 @@
               <br>
               <strong>Tweet: </strong> {{result["text"]}}
               {% for link in result["link"] %}
-              <!--
-              <button type="submit" name="appendlink" value="{{link}}" class="btn btn-small btn-link" >
-                AppendLink
+              <button type="submit" name="appendlink" value="{{link}}" class="btn btn-small" formtarget="_blank">
+              <abbr title="{{link}}" class="initialism">Append Link</abbr>
               </button>
-              -->
+              <!--
               <a href="{{link}}" target="_blank">Appended Link</a>
+              -->
               {% endfor %}
               <br>
               <strong>User Name: </strong> {{result["user"]}}<br>
             </div>
           </div>
         </div>
+      </form>
+
+      <form action="/gun_control/label" method="POST">
         <input type="submit" name="submit" value="This is a spam" class="btn btn-danger btn-small">
         Spam: Mass Marketing, auto-generated message that includes an endorsement of a product.<br>
         <input type="hidden" name="tweetid" value="{{result["id"]}}">

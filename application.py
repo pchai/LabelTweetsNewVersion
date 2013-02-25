@@ -79,7 +79,8 @@ def gun_mainpage(page):
         if not result:
             return render_template("error.html", msg="Internal Error")
         batchs = mongo.get_pull_batch(session['username'], "guncontrol")
-        return render_template("main.html", username=username, result=result, page=page, batchs=batchs)
+        description = mongo.get_description("Gun Control")
+        return render_template("main.html", username=username, result=result, page=page, batchs=batchs, description=description)
     else:
         return render_template("main.html")
 
@@ -101,8 +102,8 @@ def gun_pull():
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
-@app.route("/gun_control/label", methods=['POST', 'GET'])
-def gun_label():
+@app.route("/gun_control/startconding", methods=['POST', 'GET'])
+def start_coding():
     if request.method == "POST":
         try:
             survey = mongo.get_survey("Gun Control")
@@ -122,9 +123,40 @@ def gun_label():
                 result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, collection_tweet_name)
                 if not result:
                     return render_template("error.html", msg="Internal Error")
-
                 return render_template("label.html", batch=batch, username=escape(username), result=result, tweet_nr=tweet_nr, questions=questions)
-            elif request.form["submit"] == "This is a spam":
+        except KeyError:
+            return render_template("error.html", msg="Bad Request!")
+    else:
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
+
+@app.route("/gun_control/links", methods=['POST', 'GET'])
+def gun_links():
+    if request.method == "POST":
+        try:
+            if request.form["appendlink"]:
+                link = request.form["appendlink"]
+                return render_template("link.html", link=link)
+
+        except KeyError:
+            print sys.exc_info()[0]
+            return render_template("error.html", msg="Bad Request!")
+    else:
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
+
+@app.route("/gun_control/label", methods=['POST', 'GET'])
+def gun_label():
+    if request.method == "POST":
+        try:
+            survey = mongo.get_survey("Gun Control")
+            questions = survey["questions"] if "questions" in survey else []
+            collection_batch_name = "gunbatch" #The name of a mongodb collection of documents of batchs
+            collection_tweet_name = "guncontrol" #The name of a mongodb collection of documents of tweets
+            if 'username' in session:
+                username = mongo.get_username(session['username'])
+            else:
+                return render_template("label.html")                
+            
+            if request.form["submit"] == "This is a spam":
                 #If it is a SPAM
                 survey = [{"SPAM": True}]
                 batch = request.form["batch"]
@@ -138,6 +170,7 @@ def gun_label():
                     return render_template("cong.html")
                 else:
                     return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr, questions=questions)
+           
             elif escape(request.form["submit"]) == "next":
                 #Continue to label next tweet and save the label information
 
@@ -162,6 +195,7 @@ def gun_label():
                 else:
                     return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr, questions=questions)
         except KeyError:
+            print sys.exc_info()[0]
             return render_template("error.html", msg="Bad Request!")
 
     else:
@@ -191,11 +225,12 @@ def proces_survey():
                     return render_template("error.html", msg="Bad Request! Survey name already exists")
             elif request.form["submit"] == "Edit":
                 survey = mongo.get_survey(request.form["survey_name"])
+                description = survey["description"] if "description" in survey else ""
                 survey_name = survey["survey_name"]
                 questions = survey["questions"] if "questions" in survey else []
                 survey_log = survey_name.split(" ")[0]+"_log"
                 log = mongo.get_survey_log(survey_log)
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, log=log)
             elif request.form["submit"] == "Delete":
                 mongo.drop_survey(request.form["survey_name"])
                 return redirect(url_for('survey'))
@@ -204,6 +239,28 @@ def proces_survey():
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
+@app.route("/edit_survey/description", methods=["POST", "GET"])
+def edit_survey_description():
+    #All the request of editing survey is processed here
+    if request.method == "POST":
+        try:
+            survey_name = request.form["survey_name"]
+            survey = mongo.get_survey(survey_name)
+            questions = survey["questions"] if "questions" in survey else []
+            description = survey["description"] if "description" in survey else ""
+            survey_log = survey_name.split(" ")[0]+"_log"
+            username = mongo.get_username(session['username'])
+            #Create New description for the survey
+            if request.form["submit"] == "Update Description":
+                description = request.form["description"]
+                log = mongo.get_survey_log(survey_log)
+                mongo.update_description(survey_name, description)
+                mongo.insert_survey_log(survey_log, username, "Update the description of the survey")
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, log=log)
+        except KeyError:
+            return render_template("error.html", msg="Bad Request!Go Back")
+    else:
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
 @app.route("/edit_survey", methods=["POST", "GET"])
 def edit_survey():
@@ -213,8 +270,16 @@ def edit_survey():
             survey_name = request.form["survey_name"]
             survey = mongo.get_survey(survey_name)
             questions = survey["questions"] if "questions" in survey else []
+            description = survey["description"] if "description" in survey else ""
             survey_log = survey_name.split(" ")[0]+"_log"
             username = mongo.get_username(session['username'])
+            #Create New description for the survey
+            if request.form["submit"] == "Update Description":
+                description = request.form["description"]
+                log = mongo.get_survey_log(survey_log)
+                mongo.update_description(survey_name, description)
+                mongo.insert_survey_log(survey_log, username, "Update the description of the survey")
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, log=log)
             #Create New question
             if request.form["submit"] == "New Question":
                 question_nr = len(survey["questions"]) + 1 if "questions" in survey else 1
@@ -242,7 +307,7 @@ def edit_survey():
                 log = mongo.get_survey_log(survey_log)
                 survey = mongo.get_survey(survey_name)
                 questions = survey["questions"] if "questions" in survey else []
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, log=log)
             #Move up an existing question
             elif request.form["submit"] == "Move Up":
                 question_nr = request.form["question_nr"]
@@ -251,7 +316,7 @@ def edit_survey():
                 log = mongo.get_survey_log(survey_log)
                 survey = mongo.get_survey(survey_name)
                 questions = survey["questions"]
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, log=log)
             #Move down an existing question
             if request.form["submit"] == "Move Down":
                 question_nr = request.form["question_nr"]
@@ -260,7 +325,7 @@ def edit_survey():
                 log = mongo.get_survey_log(survey_log)
                 survey = mongo.get_survey(survey_name)
                 questions = survey["questions"]
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
+                return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, log=log)
         except KeyError:
             return render_template("error.html", msg="Bad Request! You have to select a question! Go Back")
     else:
@@ -289,9 +354,10 @@ def build_survey():
                 mongo.insert_survey_question(survey_name, question_nr, question)
             survey = mongo.get_survey(survey_name)
             questions = survey["questions"] if "questions" in survey else []
+            description = survey["description"] if "description" in survey else ""
             survey_log = survey_name.split(" ")[0]+"_log"
             log = mongo.get_survey_log(survey_log)
-            return render_template("surveypage.html", survey_name=survey_name, questions=questions, log=log)
+            return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, log=log)
         except KeyError:
             return render_template("error.html", msg="Bad Request! You have to fill in the question and answer")
     else:
