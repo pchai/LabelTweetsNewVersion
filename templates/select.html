@@ -11,12 +11,29 @@
 <body>
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 <script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
-
-<div class="container">
+<div class="navbar navbar-inverse navbar-fixed-top" >
+    <div class="navbar-inner">
+      <div class="container">
+        <div class="nav-collapse collapse">
+          <div class="pull-right">
+            <a class="btn btn-primary" href="/survey">Edit Survey
+            </a>  
+            <a class="btn btn-danger" href="/logout">Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+<div class="container" style="padding-top:50px">
   <div class="row">
     <h1>Please choose the topic you want to start labelling</h1>
     <form action="/select" method="POST">
-        <button type="submit" class="btn btn-large btn-info" name="guncontrol" value="true">Gun Control</button>
+        {% for r in result%}
+        <button type="submit" class="btn btn-large btn-info" name="survey" value="{{r['survey_name']}}">
+            {{r["survey_name"]}}
+        </button>
+        {% endfor %}
     </form>
     </div>
 </div>

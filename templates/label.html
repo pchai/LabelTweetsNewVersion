@@ -72,7 +72,7 @@
                         {{a["text"]}}
                     </label>
                 {% endfor %}
-            {% else %}
+            {% elif q["option"] == "single" %}
                 {% for a in q["answers"] %}
                     <label class="radio">
                         <input type="radio" name="{{q['_id']}}" value="{{a["text"]}}">

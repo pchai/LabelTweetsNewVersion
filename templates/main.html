@@ -82,7 +82,7 @@
             <td><strong>Action</strong></td>
           </tr>
           <form action="/gun_control/pull" method="post">
-            {% for i in range(0, 20)%}
+            {% for i in range(0, 10)%}
               <tr>
                 <td>{{result['batch'][i]}}</td>
 
@@ -122,7 +122,7 @@
             <tr>
               <td></td>
               <td></td>
-              <td><input type="submit" class="btn btn-primary" value="Confirm" data-loading-text="Loading..."></td>
+              <td><input type="submit" class="btn btn-primary" value="Pull Batch" data-loading-text="Loading..."></td>
             </tr>
         </form>
       </table>
@@ -136,8 +136,8 @@
             <a href="/gun_control/mainpage/{{page-1}}">&larr; Previous</a>
           </li>
         {% endif %}
-        Page {{page}}/5
-        {% if page == 5 %}
+        Page {{page}}/10
+        {% if page == 10 %}
           <li class="next disabled">
             <a href="#">Next &rarr;</a>
           </li>

@@ -32,7 +32,8 @@ def signup():
                 if not mongo.insert_login(request.form["emailSignup"], request.form["userName"]):
                     return render_template("error.html", msg="Internal Error")
                 session['username'] = request.form["emailSignup"]
-                return render_template("select.html")
+                result = mongo.exist_survey()
+                return render_template("select.html", result=result)
             else:
                 return render_template("error.html", msg="You have got a email address registered, go back and login using your email address")
         except KeyError:
@@ -47,7 +48,8 @@ def login():
         try:
             if mongo.valid_login(request.form["emailSignin"]):
                 session['username'] = request.form["emailSignin"]
-                return render_template("select.html")
+                result = mongo.exist_survey()
+                return render_template("select.html", result=result)
             else:
                 return render_template("error.html", msg="No record exists, go back an signup")
         except KeyError:
@@ -64,11 +66,12 @@ def logout():
 def select():
     if request.method == "POST":
         try:
-            if request.form["guncontrol"] == "true":
+            if request.form["survey"] == "Gun Control":
                 return redirect(url_for('gun_mainpage'))
         except KeyError:
             return render_template("error.html", msg="Bad Request! You should select an option")
-
+    else:
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
 @app.route("/gun_control/mainpage/", defaults={'page': 1})
 @app.route("/gun_control/mainpage/<int:page>")
@@ -98,7 +101,6 @@ def gun_pull():
                 return render_template("error.html", msg="You are not logged in")
         except KeyError:
             return render_template("error.html", msg="Bad Request! You have to pull a batch before confirming")
-
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
@@ -181,14 +183,22 @@ def gun_label():
                     return render_template("error.html", msg="Internal Error")
                 tweet_id = request.form["tweetid"]
                 survey = []
+                prev = -1
                 for q in questions:
                     tmp = {"questions": q["text"], "answer": []}
                     answer = request.form.getlist(str(q["_id"]))
                     if answer == []:
-                        return render_template("error.html", msg="You haven't answer question " + str(q["_id"]))
+                        if "followup" in q and q["followup"] == True:
+                            if prev != -1:
+                                prev_answer = request.form.getlist(str(prev))[0]
+                                if prev_answer == "Yes":
+                                    return render_template("error.html", msg="You have to answer question " + str(q["_id"]))
+                        else:
+                            return render_template("error.html", msg="You haven't answer question " + str(q["_id"]))
                     for a in answer:
                         tmp["answer"].append(a)
                     survey.append(tmp)
+                    prev = q["_id"] 
                 mongo.update_label(tweet_id, survey, batch, tweet_nr, collection_tweet_name, collection_batch_name, username)
                 if int(tweet_nr) == tweets_per_batch:
                     return render_template("cong.html")
@@ -233,6 +243,13 @@ def proces_survey():
                 return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, log=log)
             elif request.form["submit"] == "Delete":
                 mongo.drop_survey(request.form["survey_name"])
+                return redirect(url_for('survey'))
+            elif request.form["submit"] == "Lock":
+                mongo.lock_survey(request.form["survey_name"], True)
+                return redirect(url_for('survey'))
+            elif request.form["submit"] == "Unlock":
+                print "here"
+                mongo.lock_survey(request.form["survey_name"], False)
                 return redirect(url_for('survey'))
         except KeyError:
             return render_template("error.html", msg="Bad Request! Go Back")
@@ -343,11 +360,14 @@ def build_survey():
             answers = answer_text.split("\n")
             survey_name = request.form["survey_name"]
             question_nr = request.form["question_nr"]
+            followup = False
+            if "followup" in request.form and request.form["followup"] == "true":
+                followup = True
             lst = []
             for a in answers:
                 if a:
                     lst.append({"answer_nr": answers.index(a), "text": a.strip("\r")})
-            question = {"_id": int(question_nr), "option": option, "text": question_text, "answers": lst}
+            question = {"_id": int(question_nr), "option": option, "followup" : followup, "text": question_text, "answers": lst}
             if request.form["submit"] == "Finish":
                 mongo.update_survey(survey_name, question)
             elif request.form["submit"] == "Insert":

@@ -43,12 +43,16 @@
     <form method="post" action="/process_survey">
     {% for e in result %}
         <label class="radio">
-            <input type="radio" name="survey_name" value="{{e}}" checked>
-            {{e}}
+            <input type="radio" name="survey_name" value="{{e['survey_name']}}" checked>
+            {{e["survey_name"]}}
+            {% if e["lock"] == True %}
+              <span class="label label-important">Locked</span>
+            {% endif %}
         </label>
     {% endfor %}
     <input type="submit" name="submit" class="btn btn-success" value="Edit">
-    <input type="submit" name="submit" class="btn btn-danger" value="Delete">
+    <input type="submit" name="submit" class="btn btn-danger" value="Lock">
+    <input type="submit" name="submit" class="btn btn-warning" value="Unlock">
     </form>
   </div><!--end row-->
 </div><!--end container-->

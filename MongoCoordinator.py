@@ -73,7 +73,7 @@ class MongoDBCoordinator:
     def get_batchs(self, skip_nr, batch):
         collection = self.dbh[batch]
         try:
-            batchs = collection.find(sort=[("batch", ASCENDING)]).skip(skip_nr * 20)
+            batchs = collection.find(sort=[("batch", ASCENDING)]).skip(skip_nr * 10)
             allbatchs = collection.find(sort=[("batch", ASCENDING)])
             result = {"batch": [], "owner": [], "labeld": [], "dict": [], "sampling": 0}
             sampling = 0
@@ -187,6 +187,10 @@ class MongoDBCoordinator:
             collection.update({"id_str": tweet_id}, {"$set": {"label_option": [{"user": username, "survey":survey}]}}, safe=True)
         collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner."+username: int(tweet_nr)}}, safe=True)
 
+    def lock_survey(self, survey_name, bool_value):
+        collection = self.dbh["survey"]
+        collection.update({"survey_name": survey_name}, {"$set": {"lock" : bool_value}})
+
     def new_survey(self, survey_name):
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name": survey_name})
@@ -204,7 +208,7 @@ class MongoDBCoordinator:
         data = collection.find()
         result = []
         for d in data:
-            result.append(d.get("survey_name"))
+            result.append(d)
         return result
 
     def get_survey(self, survey_name):

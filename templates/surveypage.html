@@ -38,10 +38,16 @@
         <input type="hidden" name="survey_name" value="{{survey_name}}">
         <textarea name="description" form="description_form" rows="5" cols="50">{{description}}
         </textarea>
-        <input type="submit" name="submit" class="btn btn-small" value="Update Description">
+        <input type="submit" name="submit" class="btn btn-small" value="Update Description">    
     </form>
+    <br>
     <form method="post" action="/edit_survey" name="surveyform">
-        <br>
+        <input type="submit" name="submit" class="btn btn-small" value="Edit Question">
+        <input type="submit" name="submit" class="btn btn-small" value="Delete Question">
+        <input type="submit" name="submit" class="btn btn-small" value="Move Up">
+        <input type="submit" name="submit" class="btn btn-small" value="Move Down">
+        <input type="submit" name="submit" class="btn btn-small" value="Insert Question">
+        <input type="submit" name="submit" class="btn btn-info" value="New Question">
         <input type="hidden" name="survey_name" value="{{survey_name}}">
         <table class="table">
         {% for q in questions %}
@@ -56,7 +62,7 @@
                         {{a["text"]}}
                     </label>
                 {% endfor %}
-            {% else %}
+            {% elif q["option"] == "single" %}
                 {% for a in q["answers"] %}
                     <label class="radio">
                         <input type="radio" name="radio" value="">
@@ -67,7 +73,7 @@
         </td>
          <td>
             <label class="radio">
-                <input type="radio" name="question_nr" value="{{q['_id']}}">Check to apply below operation to this question
+                <input type="radio" name="question_nr" value="{{q['_id']}}">Check to apply above operation
             </label>
             </td>
         </tr>
@@ -75,12 +81,7 @@
         </table>
         <br>
         <br>
-        <input type="submit" name="submit" class="btn btn-small" value="Edit Question">
-        <input type="submit" name="submit" class="btn btn-small" value="Delete Question">
-        <input type="submit" name="submit" class="btn btn-small" value="Move Up">
-        <input type="submit" name="submit" class="btn btn-small" value="Move Down">
-        <input type="submit" name="submit" class="btn btn-small" value="Append Question">
-        <input type="submit" name="submit" class="btn btn-info" value="New Question">
+        
     </form>
     </div>
     <div class="span4" style="background-color: #e4e7eb">

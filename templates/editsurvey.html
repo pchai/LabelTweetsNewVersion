@@ -36,14 +36,32 @@
     {% endif %}
     What is the type of the question?<br>
     <select name="option" form="build_question">
-      <option value="single">Single-choice question</option>
-      <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
+      {% if question["option"] == "multiple" %}
+        <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
+        <option value="single">Single-choice question</option>
+      {% elif question["option"] == 'single' %}
+        <option value="single">Single-choice question</option>
+        <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
+      {% else %}
+        <option value="single">Single-choice question</option>
+        <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
+      {% endif %}
     </select>
+   
     <form method="post" action="/build_survey" id="build_question">
+      {% if "followup" in question and question["followup"] == True %}
+        <label class="checkbox">
+          <input type="checkbox" name="followup" value="true" checked> This is a follow up question for the previous question.
+        </label>
+      {% else %}
+        <label class="checkbox">
+          <input type="checkbox" name="followup" value="true"> This is a follow up question for the previous question.
+        </label>
+      {% endif %}
       <input type="hidden" name="survey_name" value="{{survey_name}}">
       <input type="hidden" name="question_nr" value="{{question_nr}}">
       {% if flag == "insert" %}
-        <input type="submit" name="submit" class="btn btn-info" value="Insert">        
+        <input type="submit" name="submit" class="btn btn-info" value="Insert">
       {% else %}
       <input type="submit" name="submit" class="btn btn-info" value="Finish">
      
