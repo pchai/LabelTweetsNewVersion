@@ -303,7 +303,7 @@ def edit_survey():
                 mongo.insert_survey_log(survey_log, username, "Created a new question")
                 return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr)
             #Insert a new question
-            if request.form["submit"] == "Append Question":
+            if request.form["submit"] == "Insert Question":
                 question_nr = int(request.form["question_nr"]) + 1
                 mongo.insert_survey_log(survey_log, username, "Insert a new question")
                 return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr, flag="insert")
@@ -386,7 +386,7 @@ def build_survey():
 
 if __name__ == "__main__":
     """ Connect to MongoDB """
-    mongo = MongoDBCoordinator("localhost", "LabelTweets", port=10000)
+    mongo = MongoDBCoordinator("128.122.79.158", "LabelTweets", port=10000)
     app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
-    #app.debug = True
-    app.run(host='128.122.79.158', port=8080)
+    app.debug = True
+    app.run(host='localhost', port=8080)

@@ -29,6 +29,7 @@ class MongoDBCoordinator:
             self.mongo = Connection(self.host, self.port)
         except ConnectionFailure, e:
             sys.stderr.write("Could not connect to MongoDB: %s" % e)
+        print self.mongo
         self.dbh = self.mongo[self.database]
         self.dbh.authenticate("root", "zn9zabgy")
 
