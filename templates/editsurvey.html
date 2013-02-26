@@ -50,15 +50,15 @@
       {% endif %}
     </select>
 
-      {% else %}
+    {% else %}
       <select name="option" form="build_question">
 
         <option value="single">Single-choice question</option>
         <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
       </select>
 
-      {% endif %}
-   
+    {% endif %}
+
     <form method="post" action="/build_survey" id="build_question">
       {% if "followup" in question and question["followup"] == True %}
         <label class="checkbox">
@@ -75,7 +75,7 @@
         <input type="submit" name="submit" class="btn btn-info" value="Insert">
       {% else %}
       <input type="submit" name="submit" class="btn btn-info" value="Finish">
-     
+
       {% endif %}
     </form>
   </div><!--end row-->

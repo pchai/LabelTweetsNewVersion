@@ -389,4 +389,4 @@ if __name__ == "__main__":
     mongo = MongoDBCoordinator("128.122.79.158", "LabelTweets", port=10000)
     app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
     app.debug = True
-    app.run(host='localhost', port=8080)
+    app.run(host='128.122.79.158', port=8080)
