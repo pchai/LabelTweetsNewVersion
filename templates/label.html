@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <title>Label</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
   <link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet" media="screen">
+  <link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
   <script>
   function goBack()
    {
@@ -20,9 +20,13 @@
 <div class="navbar navbar-inverse navbar-fixed-bottom" >
     <div class="navbar-inner">
       <div class="container">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
         <div class="nav-collapse collapse">
-          
-          <div class="pull-right">
+          <div class="nav pull-right">
             <a class="btn btn-success" href="/gun_control/mainpage/">Done Coding Now</a>
             <a class="btn btn-danger" href="/logout">Logout</a>
           </div>
