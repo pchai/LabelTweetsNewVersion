@@ -45,25 +45,7 @@
         <table class="table">
         {% for q in questions %}
         <tr>
-          <td>
-            <button type="submit" name="edit" value="{{q['_id']}}" class="btn btn-small btn-info">
-              Edit 
-            </button>
-            <button type="submit" name="insert" value="{{q['_id']}}" class="btn btn-small btn-success">
-              Insert Below
-            </button>
-            <button type="submit" name="new" value="{{q['_id']}}" class="btn btn-small btn-primary">
-              Add to the End
-            </button>
-            <button type="submit" name="delete" value="{{q['_id']}}" class="btn btn-small btn-danger">
-              Delete
-            </button>
-            <button type="submit" name="up" value="{{q['_id']}}" class="btn btn-small btn-warning">
-              Move Up
-            </button>
-            <button type="submit" name="down" value="{{q['_id']}}" class="btn btn-small btn-warning">
-              Move Down
-            </button>           
+          <td>           
             <br>
             <strong>{{q["_id"]}}. {{q["text"]}}</strong>
             {% if q["option"] == "multiple" %}
@@ -81,6 +63,24 @@
                     </label>
                 {% endfor %}
             {% endif %}
+            <button type="submit" name="edit" value="{{q['_id']}}" class="btn btn-small btn-info">
+              Edit 
+            </button>
+            <button type="submit" name="insert" value="{{q['_id']}}" class="btn btn-small btn-success">
+              Insert Below
+            </button>
+            <button type="submit" name="new" value="{{q['_id']}}" class="btn btn-small btn-primary">
+              Add to the End
+            </button>
+            <button type="submit" name="delete" value="{{q['_id']}}" class="btn btn-small btn-danger">
+              Delete
+            </button>
+            <button type="submit" name="up" value="{{q['_id']}}" class="btn btn-small btn-warning">
+              Move Up
+            </button>
+            <button type="submit" name="down" value="{{q['_id']}}" class="btn btn-small btn-warning">
+              Move Down
+            </button>
           </td>
         </tr>
         {% endfor %}
