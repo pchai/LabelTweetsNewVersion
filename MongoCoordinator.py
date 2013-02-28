@@ -118,18 +118,18 @@ class MongoDBCoordinator:
         collection = self.dbh[myCollection]
         try:
             label_counter = (batch_nr - 1) * 100 + tweet_nr
-            tweets = collection.find({"label_counter": label_counter})
+            tweet = collection.find_one({"label_counter": label_counter})
             result = {"id": "", "text": "", "label_counter": "", "user": "", "link": []}
-            for tweet in tweets:
-                result["id"] = tweet.get("id_str")
-                result["text"] = tweet.get("text")
-                result["tweet_nr"] = str(tweet_nr)
-                user = tweet.get("user")
-                result["user"] = user["screen_name"]
-                entity = tweet.get("entities")
-                urls = entity["urls"]
-                for u in urls:
-                    result["link"].append(u["expanded_url"])
+            result["id"] = tweet.get("id_str")
+            result["text"] = tweet.get("text")
+            result["tweet_nr"] = str(tweet_nr)
+            user = tweet.get("user")
+            result["user"] = user["screen_name"]
+            result["description"] = user["description"]
+            entity = tweet.get("entities")
+            urls = entity["urls"]
+            for u in urls:
+                result["link"].append(u["expanded_url"])
             return result
         except:
             print "Unexpected error on get_tweet:", sys.exc_info()[0]
@@ -176,6 +176,26 @@ class MongoDBCoordinator:
             print "Unexpected error on add_batch:", sys.exc_info()[0]
             return False
         return True
+
+    def put_back_batch(self, batch_nr, batch, email, collection):
+        collection_member = self.dbh["members"]
+        collection_batch = self.dbh[batch]
+        try:
+            user = collection_member.find_one({"email": email})
+            name = user.get("user_name")
+            doc = collection_batch.find_one({"batch": int(batch_nr)})
+            owner = doc.get("owner")
+            if name in owner and owner[name] == 0:
+                collection_batch.update({"batch": int(batch_nr)}, {"$unset": {"owner."+name: owner}}, safe=True)
+            batch_dict = user.get("batch")
+            batch_list = batch_dict.get(collection)
+            if batch_list:
+                if batch_nr in batch_list:
+                    batch_list.remove(batch_nr)
+            collection_member.update({"email": email}, {"$set": {"batch." + collection: batch_list}}, safe=True)
+        except:
+            print "Unexpected error on add_batch:", sys.exc_info()[0]
+
 
     def update_label(self, tweet_id, survey, batch_nr, tweet_nr, collection, batch, username):
         '''This method will upinsert the labelling of the tweet'''

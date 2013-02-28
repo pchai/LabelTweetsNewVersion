@@ -16,13 +16,12 @@
       <div class="container">
         <div class="nav-collapse collapse">
           <ul class="nav">
-            <li class="active">
+            <li>
               <a href="/gun_control/mainpage/">Home</a>
             </li>
           </ul>
           <div class="pull-right">
-            <a class="btn btn-primary" href="/survey">Edit Survey
-            </a>
+            <a href="/gun_control/mainpage/" href="/survey" class="btn btn-success">Finish</a>
             <a class="btn btn-danger" href="/logout">Logout
             </a>
           </div>
@@ -36,24 +35,36 @@
     <div class="span8">
     <form method="post" action="/edit_survey/description" id="description_form">
         <input type="hidden" name="survey_name" value="{{survey_name}}">
-        <textarea name="description" form="description_form" rows="5" cols="50">{{description}}
-        </textarea>
-        <input type="submit" name="submit" class="btn btn-small" value="Update Description">    
+        <textarea name="description" form="description_form" rows="5" cols="80">{{description}}
+        </textarea><br>
+        <input type="submit" name="submit" class="btn btn-small btn-info" value="Update Description">    
     </form>
     <br>
     <form method="post" action="/edit_survey" name="surveyform">
-        <input type="submit" name="submit" class="btn btn-small" value="Edit Question">
-        <input type="submit" name="submit" class="btn btn-small" value="Delete Question">
-        <input type="submit" name="submit" class="btn btn-small" value="Move Up">
-        <input type="submit" name="submit" class="btn btn-small" value="Move Down">
-        <input type="submit" name="submit" class="btn btn-small" value="Insert Question">
-        <input type="submit" name="submit" class="btn btn-info" value="New Question">
         <input type="hidden" name="survey_name" value="{{survey_name}}">
         <table class="table">
         {% for q in questions %}
-            <tr>
-
-            <td>
+        <tr>
+          <td>
+            <button type="submit" name="edit" value="{{q['_id']}}" class="btn btn-small btn-info">
+              Edit 
+            </button>
+            <button type="submit" name="insert" value="{{q['_id']}}" class="btn btn-small btn-success">
+              Insert Below
+            </button>
+            <button type="submit" name="new" value="{{q['_id']}}" class="btn btn-small btn-primary">
+              Add to the End
+            </button>
+            <button type="submit" name="delete" value="{{q['_id']}}" class="btn btn-small btn-danger">
+              Delete
+            </button>
+            <button type="submit" name="up" value="{{q['_id']}}" class="btn btn-small btn-warning">
+              Move Up
+            </button>
+            <button type="submit" name="down" value="{{q['_id']}}" class="btn btn-small btn-warning">
+              Move Down
+            </button>           
+            <br>
             <strong>{{q["_id"]}}. {{q["text"]}}</strong>
             {% if q["option"] == "multiple" %}
                 {% for a in q["answers"] %}
@@ -70,12 +81,7 @@
                     </label>
                 {% endfor %}
             {% endif %}
-        </td>
-         <td>
-            <label class="radio">
-                <input type="radio" name="question_nr" value="{{q['_id']}}">Check to apply above operation
-            </label>
-            </td>
+          </td>
         </tr>
         {% endfor %}
         </table>

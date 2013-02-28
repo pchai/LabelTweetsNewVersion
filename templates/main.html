@@ -32,7 +32,7 @@
 </div>
 <div class="container" style="padding-top:50px">
   <div class="row">
-    {% if username %}
+    {% if username and lock == False %}
       <h2 class="muted">Hi, {{ username }}</h2>
       {{description}}
       <hr>
@@ -66,8 +66,10 @@
           {% endfor %}
           {% if batchs|length == 0 %}
             <a class="btn btn-success btn-large disabled" href="#">Start coding</a>
+            <a class="btn btn-primary btn-large disabled" href="#">Put Back</a>
           {% else %}
             <input type="submit" name="submit" value="Start coding" class="btn btn-success btn-large">
+            <input type="submit" name="submit" value="Put Back" class="btn btn-primary btn-large">
           {% endif %}
         </form>
       <hr>
@@ -99,31 +101,24 @@
                 <td>
                 {% if result['sampling'] < 20 %} <!--Here should adapt percentage-->
                   {% if result['owner'][i]|length < 2 %}  <!--Here should adapt Fold-->
-                    <label class="radio">
-                      <input type="radio" name="batch" value="{{result['batch'][i]}}">
-                      Pull
-                    </label>
+                    <button type="submit" name="pull" value="{{result['batch'][i]}}" class="btn btn-small btn-primary">
+                      Pull 
+                    </button>
                   {% else %}
-                    <span class="label label-info">Taken</span>
+                    <span class="label label-warning">Taken</span>
                   {% endif %}
                 {% else %}
                   {% if result['owner'][i]|length == 0 %}
-                    <label class="radio">
-                      <input type="radio" name="batch" value="{{result['batch'][i]}}">
-                      Pull
-                    </label>
+                    <button type="submit" name="pull" value="{{result['batch'][i]}}" class="btn btn-small btn-primary">
+                      Pull 
+                    </button>
                   {% else %}
-                    <span class="label label-info">Taken</span>
+                    <span class="label label-warning">Taken</span>
                   {% endif %}
                 {% endif %}
                 </td>
               </tr>
             {% endfor %}
-            <tr>
-              <td></td>
-              <td></td>
-              <td><input type="submit" class="btn btn-primary" value="Pull Batch" data-loading-text="Loading..."></td>
-            </tr>
         </form>
       </table>
       <ul class="pager">
@@ -149,8 +144,12 @@
       </ul>
       {% endif %}
     {% else %}
-      <h2 class="muted">Sorry you are not signed in</h2>
-      <p>Click <a href="#">here</a> to sing in</p>
+      {% if lock == False %}
+        <h2 class="muted">Sorry you are not signed in</h2>
+        <p>Click <a href="#">here</a> to sing in</p>
+      {% else %}
+        <h1 class="muted">Sorry survey is locked</h1>
+      {% endif %}
     {% endif %}
 	</div><!--end row-->
 </div><!--end container-->

@@ -18,21 +18,19 @@
     <h2>Question {{question_nr}}</h2>
     <h2>Enter the question you want to ask in below section</h2>
     {% if question %}
-      <textarea name="question" form="build_question" rows="5">{{question["text"]}}
-      </textarea>
+      <textarea name="question" form="build_question" rows="5">{{question["text"]}}</textarea>
     {% else %}
-      <textarea name="question" form="build_question" rows="5" placeholder="Enter the question">
-      </textarea>
+      <textarea name="question" form="build_question" rows="5" placeholder="Enter the question"></textarea>
     {% endif %}
 
     <h2>List all the possible answers to the above questions</h2>
     <strong>Note:</strong>Put each possible answer on a line of it's own<br>
     {% if answers %}
-      <textarea name="answers" form="build_question" rows="8">{{answers}}
-      </textarea><br>
+      <textarea name="answers" form="build_question" rows="8">{{answers}}</textarea>
+      <br>
     {% else %}
-      <textarea name="answers" form="build_question" rows="8" placeholder="Enter the answers">
-      </textarea><br>
+      <textarea name="answers" form="build_question" rows="8" placeholder="Enter the answers"></textarea>
+      <br>
     {% endif %}
     What is the type of the question?<br>
     {% if  question %}
