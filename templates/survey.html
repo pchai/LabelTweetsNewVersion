@@ -22,7 +22,7 @@
         <div class="nav-collapse collapse">
           <ul class="nav">
             <li>
-              <a href="/gun_control/mainpage/">Home</a>
+              <a href="/select">Home</a>
             </li>
           </ul>
           <div class="nav pull-right">
@@ -35,27 +35,29 @@
 </div>
 <div class="container" style="padding-top:50px">
   <div class="row">
-    <h1>Create a survey for existing topic!</h1>
-    <form method="post" action="/process_survey">
-      <label class="radio">
-        <input type="radio" name="survey" value="Gun Control">Gun Control
-      </label>
-        <input type="submit" name="submit" class="btn btn-success" value="Create">
-    </form>
     <h1>Choose an existing survey to edit</h1>
     <form method="post" action="/process_survey">
     {% for e in result %}
-        <label class="radio">
-            <input type="radio" name="survey_name" value="{{e['survey_name']}}" checked>
-            {{e["survey_name"]}}
-            {% if e["lock"] == True %}
-              <span class="label label-important">Locked</span>
-            {% endif %}
-        </label>
+      <strong>{{e["survey_name"]}}</strong>
+      {% if e["lock"] == True %}
+        <span class="label label-important">Locked</span>
+      {% endif %}
+      <br>
+      <br>
+      <button type="submit" name="edit" class="btn btn-success" value="{{e['survey_name']}}">
+        Edit
+      </button>
+      <button type="submit" name="lock" class="btn btn-danger" value="{{e['survey_name']}}">
+        Lock
+      </button>
+      <button type="submit" name="unlock" class="btn btn-warning" value="{{e['survey_name']}}">
+        Unlock
+      </button>
+      <br>
+      <br>
+      <br>
     {% endfor %}
-    <input type="submit" name="submit" class="btn btn-success" value="Edit">
-    <input type="submit" name="submit" class="btn btn-danger" value="Lock">
-    <input type="submit" name="submit" class="btn btn-warning" value="Unlock">
+    
     </form>
   </div><!--end row-->
 </div><!--end container-->

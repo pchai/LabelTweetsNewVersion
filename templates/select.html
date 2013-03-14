@@ -27,9 +27,12 @@
 </div>
 <div class="container" style="padding-top:50px">
   <div class="row">
-    <h1>Please choose the topic you want to start labelling</h1>
+    <h1>Please choose the topic you want to start coding</h1>
     <form action="/select" method="POST">
         {% for r in result%}
+          <br>
+          <br>
+          <br>
           {% if r['lock'] == True %}
             <a class="btn btn-large btn-info disabled" href="#">
             {{r["survey_name"]}}

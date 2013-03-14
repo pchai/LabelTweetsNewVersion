@@ -41,7 +41,7 @@
       <hr>
       <h4>Your batch(es)</h4>
         {% if batchs|length == 0 %}
-          <span class="label">Note </span><small> You have to pull at least a batch</small><br>
+          <span class="label">Note </span><small> You have to pull a batch from existing batchs</small><br>
         {% endif %}
         <form action="/{{survey_name}}/startconding" method="post">
           {% for batch in batchs %}
@@ -69,9 +69,9 @@
           {% endfor %}
           {% if batchs|length == 0 %}
             <a class="btn btn-success btn-large disabled" href="#">Start coding</a>
-            <a class="btn btn-info btn-large disabled" href="#">Put Back</a>
+            <a class="btn btn-primary btn-large disabled" href="#">Put Back</a>
           {% else %}
-            <button type="submit" name="code" value="true" class="btn btn-info btn-large">
+             <button type="submit" name="code" value="true" class="btn btn-info btn-large">
               Start Coding
             </button>
             <button type="submit" name="back" value="true" class="btn btn-primary btn-large">
@@ -82,12 +82,71 @@
               Give me a new batch
             </button>
         </form>
+      <hr>
+      <h4>Existing Batches</h4>
+      {% if result %}
+        <table class="table table-hover">
+          <tr>
+            <td><strong>Batch#</strong></td>
+
+            <td><strong>Labelling</strong></td>
+
+            <td><strong>Action</strong></td>
+          </tr>
+          <form action="/{{survey_name}}/pull" method="post">
+            {% for i in range(0, 10)%}
+              <tr>
+                <td>{{result['batch'][i]}}</td>
+
+                <td>
+                {% for j in range(0, result['owner'][i]|length) %}
+                  {{ result['owner'][i][j] }} ({{ result['labeld'][i][j] }})
+                
+                {% endfor %}
+                </td>
+
+                <td>
+                  {% if result['owner'][i]|length < result['fold'] %}  <!--Here should adapt Fold-->
+                    <button type="submit" name="pull" value="{{result['batch'][i]}}" class="btn btn-small btn-primary">
+                      Pull 
+                    </button>
+                  {% else %}
+                    <span class="label label-warning">Taken</span>
+                  {% endif %}
+                  
+                </td>
+              </tr>
+            {% endfor %}
+        </form>
+      </table>
+      <ul class="pager">
+        {% if page == 1 %}
+          <li class="previous disabled">
+            <a href="#">&larr; Previous</a>
+          </li>
+        {% else %}
+          <li class="previous">
+            <a href="/admin/{{survey_name}}/{{page-1}}">&larr; Previous</a>
+          </li>
+        {% endif %}
+        Page {{page}}/10
+        {% if page == 10 %}
+          <li class="next disabled">
+            <a href="#">Next &rarr;</a>
+          </li>
+        {% else %}
+          <li class="next">
+            <a href="/admin/{{survey_name}}/{{page+1}}">Next &rarr;</a>
+          </li>
+        {% endif %}
+      </ul>
+      {% endif %}
     {% else %}
       {% if lock == False %}
         <h2 class="muted">Sorry you are not signed in</h2>
         <p>Click <a href="#">here</a> to sing in</p>
       {% else %}
-        <h1 class="muted">Sorry survey is locked</h1>
+        <h1 class="muted">Sorry this page is not available for you</h1>
       {% endif %}
     {% endif %}
 	</div><!--end row-->

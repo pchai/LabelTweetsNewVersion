@@ -22,11 +22,10 @@
         <div class="nav-collapse collapse">
           <ul class="nav">
             <li>
-              <a href="/gun_control/mainpage/">Home</a>
             </li>
           </ul>
           <div class="nav pull-right">
-            <a href="/gun_control/mainpage/" href="/survey" class="btn btn-success">Finish</a>
+            <a href="/survey" class="btn btn-success">Finish</a>
             <a class="btn btn-danger" href="/logout">Logout
             </a>
           </div>
@@ -36,19 +35,68 @@
 </div>
 <div class="container" style="padding-top:50px">
   <div class="row">
-    <h1>{{survey_name}}</h1>
+    <h1>{{survey["survey_name"]}}</h1><br>
+    
     <div class="span8">
+    <h5>Description</h5>
     <form method="post" action="/edit_survey/description" id="description_form">
-        <input type="hidden" name="survey_name" value="{{survey_name}}">
-        <textarea name="description" form="description_form" rows="5" cols="80">{{description}}
+        <input type="hidden" name="survey_name" value="{{survey['survey_name']}}">
+        <textarea name="description" form="description_form" rows="5" cols="80">{{survey["description"]}}
         </textarea><br>
         <input type="submit" name="submit" class="btn btn-small btn-info" value="Update Description">    
     </form>
-    <br>
+    <hr>
+    <h5>Intercode Reliability Options</h5>
+    <form method="post" action="/edit_survey/intercode" id="intercode">
+      <input type="hidden" name="survey_name" value="{{survey['survey_name']}}">
+      {% if "intercode" in survey and survey["intercode"] == True %}
+        <label class="checkbox">
+          <input type="checkbox" name="applyintercode" value="true" checked>
+          Apply Intercode Reliability 
+        </label>
+      {% else %}
+        <label class="checkbox">
+          <input type="checkbox" name="applyintercode" value="true"> 
+          Apply Intercode Reliability 
+        </label>
+      {% endif %}
+      <select name="fold" form="intercode">
+        <option value="{{survey['fold']}}">{{survey['fold']}}</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+      <br>
+      <button type="submit" name="apply" value="true" class="btn btn-small btn-info">
+        Apply
+      </button>
+    </form>
+    <hr>
+    <h5>Save Survey Options</h5>
+    <form method="post" action="/edit_survey/save_survey" id="load_question">
+      <input type="hidden" name="survey_name" value="{{survey['survey_name']}}">
+      <button type="submit" name="save" value="true" class="btn btn-small btn-success">
+        Save questions in this survey
+      </button>
+      <br>
+      <br>
+      <br>
+      <select name="option" form="load_question">
+        <option value=""></option>
+        {% for r in result%}
+        <option value="{{r['survey_name']}}">{{r["survey_name"]}}</option>
+        {% endfor %}
+      </select>
+      <br>
+      <button type="submit" name="load" value="true" class="btn btn-small btn-warning">
+        Load Survey Questions
+      </button>
+    </form>
+
     <form method="post" action="/edit_survey" name="surveyform">
-        <input type="hidden" name="survey_name" value="{{survey_name}}">
+        <input type="hidden" name="survey_name" value="{{survey['survey_name']}}">
         <table class="table">
-        {% for q in questions %}
+        {% for q in survey["questions"] %}
         <tr>
           <td>           
             <br>
@@ -64,6 +112,13 @@
                 {% for a in q["answers"] %}
                     <label class="radio">
                         <input type="radio" name="radio" value="">
+                        {{a["text"]}}
+                    </label>
+                {% endfor %}
+            {% elif q["option"] == "any" %}
+                {% for a in q["answers"] %}
+                    <label class="checkbox">
+                        <input type="checkbox" value="">
                         {{a["text"]}}
                     </label>
                 {% endfor %}

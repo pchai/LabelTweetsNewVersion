@@ -27,7 +27,7 @@
         </a>
         <div class="nav-collapse collapse">
           <div class="nav pull-right">
-            <a class="btn btn-success" href="/gun_control/mainpage/">Done Coding Now</a>
+            <a class="btn btn-success" href="/redirect/{{survey['survey_name']}}">Done Coding Now</a>
             <a class="btn btn-danger" href="/logout">Logout</a>
           </div>
         </div>
@@ -37,7 +37,7 @@
 <div class="container" style="margin-top:120px; padding-bottom:50px">
   <div class="row">
     {% if username %}
-      <form action="/gun_control/links" method="POST" target="_blank">
+      <form action="/{{survey['survey_name']}}/links" method="POST" target="_blank">
         <div class="navbar navbar-fixed-top">
           <div class="navbar-inner">
             <div class="container">
@@ -64,7 +64,7 @@
         </div>
       </form>
 
-      <form action="/gun_control/label" method="POST">
+      <form action="/{{survey['survey_name']}}/label" method="POST">
         <small>Hit the 'This is SPAM' button if you think the tweet is spam. Spam is defined as: A mass marketing, 
         auto-generated message that includes an endorsement of a product.</small><br>
         <input type="submit" name="submit" value="This is spam" class="btn btn-danger btn-small"><br>
@@ -72,7 +72,7 @@
         <input type="hidden" name="batch" value="{{batch}}">
         <input type="hidden" name="tweet_nr" value="{{result["tweet_nr"]}}">
         <!--Here start the surveys-->
-        {% for q in questions %}
+        {% for q in survey["questions"] %}
             <strong>{{q["_id"]}}. {{q["text"]}}</strong>
             {% if q["option"] == "multiple" %}
                 {% for a in q["answers"] %}
@@ -88,11 +88,17 @@
                         {{a["text"]}}
                     </label>
                 {% endfor %}
+            {% elif q["option"] == "any" %}
+                {% for a in q["answers"] %}
+                    <label class="checkbox">
+                        <input type="checkbox" name="{{q['_id']}}" value="{{a["text"]}}">
+                        {{a["text"]}}
+                    </label>
+                {% endfor %}
             {% endif %}
         {% endfor %}
         <!--End Survey-->
-        <a class="btn btn-primary btn-large" onclick="goBack()">Back</a>
-
+        <input type="submit" name="submit" value="previous" class="btn btn-primary btn-large">
         <input type="submit" name="submit" value="next" class="btn btn-primary btn-large">
       </form>
     {% else %}
