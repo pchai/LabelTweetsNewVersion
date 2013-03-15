@@ -71,19 +71,21 @@ class MongoDBCoordinator:
             print "Unexpected error on insert_login:", sys.exc_info()[0]
             return False
 
-    def get_batchs(self, skip_nr, batch):
+    def get_batchs(self, skip_nr, batch, survey):
         collection = self.dbh[batch]
+        collection_survey = self.dbh["survey"]
+        survey = collection_survey.find_one({"survey_name": survey})
+        if "fold" in survey:
+            fold = int(survey["fold"])
+        else:
+            fold = 2
         try:
             batchs = collection.find(sort=[("batch", ASCENDING)]).skip(skip_nr * 10)
             allbatchs = collection.find(sort=[("batch", ASCENDING)])
-            result = {"batch": [], "owner": [], "labeld": [], "dict": [], "sampling": 0}
-            sampling = 0
+            result = {"batch": [], "owner": [], "labeld": [], "dict": [], "fold":fold}
             for b in allbatchs:
                 owner = b.get("owner")
                 result["dict"].append(owner)
-                if len(owner.keys()) == 2:
-                    sampling = sampling + 1
-            result["sampling"] = sampling
             for b in batchs:
                 owner = b.get("owner")
                 l1 = []
@@ -91,12 +93,39 @@ class MongoDBCoordinator:
                 for k in owner.keys():
                     l1.append(k)
                     l2.append(owner[k])
+                
                 result["batch"].append(b.get("batch"))
                 result["owner"].append(l1)
                 result["labeld"].append(l2)
             return result
         except:
             print "Unexpected error on get_batchs:", sys.exc_info()[0]
+            return {}
+
+    def get_next_batch(self, batch, survey_name, username):
+        collection_batch = self.dbh[batch]
+        collection_survey = self.dbh["survey"]
+        survey = collection_survey.find_one({"survey_name": survey_name})
+        if "intercode" in survey:
+            intercode = survey["intercode"]
+        else:
+            intercode = False
+        if "fold" in survey:
+            fold = int(survey["fold"])
+        else:
+            fold = 2
+        try:
+            batchs = collection_batch.find(sort=[("batch", ASCENDING)])
+            print batchs
+            for batch in batchs:
+                if intercode:
+                    if len(batch["owner"]) > 0 and len(batch["owner"]) < fold and username not in batch["owner"].keys():
+                        return batch["batch"]
+                else:
+                    if len(batch["owner"]) == 0:
+                        return batch["batch"]
+        except:
+            print "Unexpected error on get_next_batch:", sys.exc_info()[0]
             return {}
 
     def get_pull_batch(self, email, collection_name):
@@ -110,6 +139,7 @@ class MongoDBCoordinator:
             batch_list.sort()
         else:
             batch_list = []
+        print batch_list
         return batch_list
 
 
@@ -167,10 +197,10 @@ class MongoDBCoordinator:
             batch_dict = user.get("batch")
             batch_list = batch_dict.get(collection)
             if batch_list:
-                if batch_nr not in batch_list:
-                    batch_list.append(batch_nr)
+                if int(batch_nr) not in batch_list:
+                    batch_list.append(int(batch_nr))
             else:
-                batch_list = [batch_nr]
+                batch_list = [int(batch_nr)]
             collection_member.update({"email": email}, {"$set": {"batch." + collection: batch_list}}, safe=True)
         except:
             print "Unexpected error on add_batch:", sys.exc_info()[0]
@@ -194,7 +224,13 @@ class MongoDBCoordinator:
                     batch_list.remove(batch_nr)
             collection_member.update({"email": email}, {"$set": {"batch." + collection: batch_list}}, safe=True)
         except:
-            print "Unexpected error on add_batch:", sys.exc_info()[0]
+            print "Unexpected error on putback_batch:", sys.exc_info()[0]
+
+    def update_intercode(self, survey_name, intercode, fold):
+        collection = self.dbh["survey"]
+        collection.update({"survey_name": survey_name},
+            {"$set":{"intercode": intercode, "fold": fold}}, safe=True)
+
 
 
     def update_label(self, tweet_id, survey, batch_nr, tweet_nr, collection, batch, username):
@@ -240,6 +276,14 @@ class MongoDBCoordinator:
             collection.save(survey, safe=True)
         return survey
 
+    def get_admins(self):
+        collection = self.dbh["survey"]
+        survey = collection.find()
+        admins = []
+        for s in survey:
+            admins.extend(s["admin"])
+        return admins
+
     def update_survey(self, survey_name, question):
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name": survey_name})
@@ -263,6 +307,21 @@ class MongoDBCoordinator:
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name":survey_name})
         return survey["description"]
+
+    def get_random(self, survey_name):
+        collection = self.dbh["survey"]
+        survey = collection.find_one({"survey_name": survey_name})
+        random_list = survey["random"] if "random" in survey else []
+        return random_list
+
+    def add_random(self, survey_name, block):
+        collection = self.dbh["survey"]
+        lst = block.split(",")
+        collection.update({"survey_name": survey_name}, {"$push":{"random": lst}})
+
+    def remove_random(self, survey_name):
+        collection = self.dbh["survey"]
+        collection.update({"survey_name": survey_name}, {"$unset":{"random": 1}})
 
     def delete_survey(self, survey_name, question_nr):
         collection = self.dbh["survey"]
@@ -322,4 +381,15 @@ class MongoDBCoordinator:
         collection = self.dbh[survey_log]
         data = collection.find(sort=[("create_at", DESCENDING)]).limit(10)
         return data
+
+    def load_survey(self, survey_name, load_survey_name):
+        collection = self.dbh["survey"]
+        survey = collection.find_one({"survey_name": load_survey_name})
+        if "questions" in survey:
+            questions = survey["questions"]
+            collection.update({"survey_name": survey_name}, {"$set":{"questions":questions}})
+
+
+
+
 
