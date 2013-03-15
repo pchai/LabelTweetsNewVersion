@@ -42,7 +42,7 @@
         <input type="hidden" name="survey_name" value="{{survey_name}}">
         <textarea name="description" form="description_form" rows="5" cols="80">{{description}}
         </textarea><br>
-        <input type="submit" name="submit" class="btn btn-small btn-info" value="Update Description">    
+        <input type="submit" name="submit" class="btn btn-small btn-info" value="Update Description">
     </form>
     <br>
     <form method="post" action="/edit_survey" name="surveyform">
@@ -50,7 +50,7 @@
         <table class="table">
         {% for q in questions %}
         <tr>
-          <td>           
+          <td>
             <br>
             <strong>{{q["_id"]}}. {{q["text"]}}</strong>
             {% if q["option"] == "multiple" %}
@@ -69,13 +69,13 @@
                 {% endfor %}
             {% endif %}
             <button type="submit" name="edit" value="{{q['_id']}}" class="btn btn-small btn-info">
-              Edit 
+              Edit
             </button>
             <button type="submit" name="insert" value="{{q['_id']}}" class="btn btn-small btn-success">
-              Insert Below
+              Insert Question Below
             </button>
             <button type="submit" name="new" value="{{q['_id']}}" class="btn btn-small btn-primary">
-              Add to the End
+              Add Question to the End
             </button>
             <button type="submit" name="delete" value="{{q['_id']}}" class="btn btn-small btn-danger">
               Delete
@@ -92,7 +92,7 @@
         </table>
         <br>
         <br>
-        
+
     </form>
     </div>
     <div class="span4" style="background-color: #e4e7eb">
