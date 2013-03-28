@@ -45,7 +45,7 @@ def signup():
 
 
 @app.route("/login", methods=['POST', 'GET'])
-def login(): 
+def login():
     if request.method == "POST":
         try:
             if mongo.valid_login(request.form["emailSignin"]):
@@ -103,7 +103,7 @@ def admin_page(survey, page):
         survey = mongo.get_survey(survey)
         description = survey["description"] if "description" in survey else ""
         lock = survey["lock"] if "lock" in survey else ""
-        return render_template("admin.html", username=username, survey_name=survey_data["survey_name"], 
+        return render_template("admin.html", username=username, survey_name=survey_data["survey_name"],
             result=result, page=page, batchs=batchs, description=description, lock=lock)
     else:
         return render_template("admin.html")
@@ -118,7 +118,7 @@ def main_page(survey):
         batchs = mongo.get_pull_batch(session['username'], survey_data["tweets"])
         description = survey_data["description"] if "description" in survey_data else ""
         lock = survey_data["lock"] if "lock" in survey_data else ""
-        return render_template("main.html", username=username, survey_name=survey_data["survey_name"], 
+        return render_template("main.html", username=username, survey_name=survey_data["survey_name"],
             result=result, batchs=batchs, description=description, lock=lock)
     else:
         return render_template("main.html")
@@ -175,7 +175,7 @@ def start_coding(survey):
                 batch_nr = mongo.get_next_batch(collection_batch_name, survey, username)
                 mongo.add_batch(batch_nr, collection_batch_name, session['username'], collection_tweet_name)
                 return redirect(url_for('redirecting', survey=survey))
-                
+
         except KeyError:
             return render_template("error.html", msg="Bad Request!")
     else:
@@ -288,7 +288,7 @@ def proces_survey():
                     result = mongo.exist_survey()
                     return render_template("surveypage.html", survey=survey, result=result, log=log)
                 else:
-                    return render_template("error.html", msg="You're not authorized to edit this survey") 
+                    return render_template("error.html", msg="You're not authorized to edit this survey")
             elif "lock" in request.form and request.form["lock"]:
                 survey_name = request.form["lock"]
                 survey = mongo.get_survey(survey_name)
@@ -296,7 +296,7 @@ def proces_survey():
                     mongo.lock_survey(request.form["lock"], True)
                     return redirect(url_for('survey'))
                 else:
-                    return render_template("error.html", msg="You're not authorized to lock this survey") 
+                    return render_template("error.html", msg="You're not authorized to lock this survey")
             elif "unlock" in request.form and request.form["unlock"]:
                 survey_name = request.form["unlock"]
                 survey = mongo.get_survey(survey_name)
@@ -426,7 +426,7 @@ def edit_survey():
                 survey = mongo.get_survey(survey_name)
                 result = mongo.exist_survey()
                 survey = mongo.get_survey(survey_name)
-                return render_template("surveypage.html", surveye=survey, result=result, log=log)
+                return render_template("surveypage.html", survey=survey, result=result, log=log)
             #Move up an existing question
             elif "up" in request.form and request.form["up"]:
                 question_nr = request.form["up"]
@@ -500,7 +500,7 @@ def save_survey():
                 response.status_code = 200
                 output.write(survey_name + "\n")
                 if "questions" in survey:
-                    for q in survey["questions"]:       
+                    for q in survey["questions"]:
                         output.write("\n" + str(q["_id"]) + ". " + q["text"] + "\n")
                         for a in q["answers"]:
                             output.write(a["text"] + "\n")
@@ -529,15 +529,18 @@ def save_survey():
                     return render_template("surveypage.html", survey=survey, result=result, log=log)
                 else:
                     return render_template("error.html", msg="Bad Request! You have to select a survey to load")
- 
+
         except KeyError:
             return render_template("error.html", msg="Bad Request!")
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
 if __name__ == "__main__":
-    """ Connect to MongoDB """
-    mongo = MongoDBCoordinator("128.122.79.158", "LabelTweets", port=10000)
-    app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
-    app.debug = True
-    app.run(host='128.122.79.158', port=8080)
+    try:
+        """ Connect to MongoDB """
+        mongo = MongoDBCoordinator("localhost", "LabelTweets", port=10000)
+        app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
+        app.debug = True
+        app.run(host='128.122.79.140', port=8080)
+    except:
+        print sys.exc_info()[0]

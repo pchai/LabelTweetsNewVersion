@@ -93,7 +93,7 @@ class MongoDBCoordinator:
                 for k in owner.keys():
                     l1.append(k)
                     l2.append(owner[k])
-                
+
                 result["batch"].append(b.get("batch"))
                 result["owner"].append(l1)
                 result["labeld"].append(l2)
@@ -139,7 +139,6 @@ class MongoDBCoordinator:
             batch_list.sort()
         else:
             batch_list = []
-        print batch_list
         return batch_list
 
 
@@ -298,11 +297,11 @@ class MongoDBCoordinator:
             collection.save(survey, safe=True)
         else:
             collection.update({"survey_name": survey_name}, {"$push": {"questions": question}}, upsert=True, safe=True)
-    
+
     def update_description(self, survey_name, description):
         collection = self.dbh["survey"]
         collection.update({"survey_name": survey_name}, {"$set":{"description": description}})
-        
+
     def get_description(self, survey_name):
         collection = self.dbh["survey"]
         survey = collection.find_one({"survey_name":survey_name})
