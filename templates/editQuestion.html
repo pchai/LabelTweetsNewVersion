@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Build Survey</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{{ url_for('static', filename='bootstrap.css') }}" rel="stylesheet" media="screen">
+    <link href="{{ url_for('static', filename='bootstrap-responsive.css') }}" rel="stylesheet">
+</head>
+
+<body>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script src="{{ url_for('static', filename='bootstrap.js') }}"></script>
+
+<div class="container">
+  <div class="row">
+    <h1>{{survey_name}}</h1>
+    <h2>Question {{question_nr}}</h2>
+    <form method="post" action="/matrix_question">
+      <button type="submit" name="pull" class="btn btn-small" value="true">
+      Make this a matrix question
+      </button>
+      <input type="hidden" name="survey_name" value="{{survey_name}}">
+      <input type="hidden" name="question_nr" value="{{question_nr}}">
+    </form>
+    <h4>Enter the question you want to ask in below section</h4>
+    {% if question %}
+      <textarea name="question" form="build_question" rows="3">{{question["text"]}}</textarea>
+    {% else %}
+      <textarea name="question" form="build_question" rows="3" placeholder="Enter the question"></textarea>
+    {% endif %}
+
+    <h4>List all the possible answers to the above questions</h4>
+    <strong>Note:</strong>Put each possible answer on a line of it's own<br>
+    {% if answers %}
+      <textarea name="answers" form="build_question" rows="4">{{answers}}</textarea>
+      <br>
+    {% else %}
+      <textarea name="answers" form="build_question" rows="4" placeholder="Enter the answers"></textarea>
+      <br>
+    {% endif %}
+    What is the type of the question?<br>
+    {% if  question %}
+
+    <select name="option" form="build_question">
+      {% if question["option"] == "multiple" %}
+        <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
+        <option value="single">Single-choice question</option>
+        <option value="any">Check only if any apply(e.g., “don't have to select one answer”)</option>
+      {% elif question["option"] == 'single' %}
+        <option value="single">Single-choice question</option>
+        <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
+        <option value="any">Check only if any apply(e.g., “don't have to select one answer”)</option>
+      {% elif question["option"] == 'any' %}
+        <option value="any">Check only if any apply(e.g., “don't have to select one answer”)</option>
+        <option value="single">Single-choice question</option>
+        <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
+      {% else %}
+        <option value="single">Single-choice question</option>
+        <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
+        <option value="any">Check only if any apply(e.g., “don't have to select one answer”)</option>
+      {% endif %}
+    </select>
+
+    {% else %}
+      <select name="option" form="build_question">
+        <option value="single">Single-choice question</option>
+        <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
+        <option value="any">Check only if any apply(e.g., “don't have to select one answer”)</option>
+      </select>
+
+    {% endif %}
+
+    <form method="post" action="/build_survey" id="build_question">
+      {% if "followup" in question and question["followup"] == True %}
+        <label class="checkbox">
+          <input type="checkbox" name="followup" value="true" checked> This is a follow up question for the previous question.
+        </label>
+      {% else %}
+        <label class="checkbox">
+          <input type="checkbox" name="followup" value="true"> This is a follow up question for the previous question.
+        </label>
+      {% endif %}
+      <input type="hidden" name="survey_name" value="{{survey_name}}">
+      <input type="hidden" name="question_nr" value="{{question_nr}}">
+      {% if flag == "insert" %}
+        <input type="submit" name="submit" class="btn btn-info" value="Insert">
+      {% else %}
+      <input type="submit" name="submit" class="btn btn-info" value="Finish">
+
+      {% endif %}
+    </form>
+  </div><!--end row-->
+</div><!--end container-->
+
+</body>
+</html>

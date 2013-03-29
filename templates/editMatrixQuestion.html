@@ -16,26 +16,35 @@
   <div class="row">
     <h1>{{survey_name}}</h1>
     <h2>Question {{question_nr}}</h2>
-    <h2>Enter the question you want to ask in below section</h2>
+    <a href="#" class="btn btn-small disabled">Make this a matrix question</a>
+    <h4>Enter the question you want to ask in below section</h4>
     {% if question %}
-      <textarea name="question" form="build_question" rows="5">{{question["text"]}}</textarea>
+      <textarea name="question" form="build_matrix_survey" rows="3">{{question["text"]}}</textarea>
     {% else %}
-      <textarea name="question" form="build_question" rows="5" placeholder="Enter the question"></textarea>
+      <textarea name="question" form="build_matrix_survey" rows="3" placeholder="Enter the question"></textarea>
     {% endif %}
 
-    <h2>List all the possible answers to the above questions</h2>
-    <strong>Note:</strong>Put each possible answer on a line of it's own<br>
-    {% if answers %}
-      <textarea name="answers" form="build_question" rows="8">{{answers}}</textarea>
+    <h4>Row Choices: Enter each choice on a separate line.</h4>
+    {% if row_choices %}
+      <textarea name="row_choices" form="build_matrix_survey" rows="4">{{row_choices}}</textarea>
       <br>
     {% else %}
-      <textarea name="answers" form="build_question" rows="8" placeholder="Enter the answers"></textarea>
+      <textarea name="row_choices" form="build_matrix_survey" rows="4" placeholder="Enter the answers"></textarea>
       <br>
     {% endif %}
+    <h4>Column Choices: Enter the text for each column on a separate line.</h4>
+    {% if column_choices %}
+      <textarea name="column_choices" form="build_matrix_survey" rows="4">{{column_choices}}</textarea>
+      <br>
+    {% else %}
+      <textarea name="column_choices" form="build_matrix_survey" rows="4" placeholder="Enter the answers"></textarea>
+      <br>
+    {% endif %}
+
     What is the type of the question?<br>
     {% if  question %}
 
-    <select name="option" form="build_question">
+    <select name="option" form="build_matrix_survey">
       {% if question["option"] == "multiple" %}
         <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
         <option value="single">Single-choice question</option>
@@ -56,7 +65,7 @@
     </select>
 
     {% else %}
-      <select name="option" form="build_question">
+      <select name="option" form="build_matrix_survey">
         <option value="single">Single-choice question</option>
         <option value="multiple">Multiple-choice/dichotomy (e.g., “check all that apply”)</option>
         <option value="any">Check only if any apply(e.g., “don't have to select one answer”)</option>
@@ -64,7 +73,7 @@
 
     {% endif %}
 
-    <form method="post" action="/build_survey" id="build_question">
+    <form method="post" action="/build_matrix_survey" id="build_matrix_survey">
       {% if "followup" in question and question["followup"] == True %}
         <label class="checkbox">
           <input type="checkbox" name="followup" value="true" checked> This is a follow up question for the previous question.

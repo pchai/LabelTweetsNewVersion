@@ -74,27 +74,55 @@
         <!--Here start the surveys-->
         {% for q in survey["questions"] %}
             <strong>{{q["_id"]}}. {{q["text"]}}</strong>
-            {% if q["option"] == "multiple" %}
+            
+            {% if "matrix" in q and q["matrix"] == true %}
+              <table class="table table-hover">
+                <tr>
+                  <td></td>
+                  {% for c in q["column_choices"] %}
+                    <td>{{c}}</td>
+                  {% endfor %}
+                </tr>
+                {% set count = 0 %}
+                {% for r in q["row_choices"] %}
+                  {% set count = count + 1 %}
+                  <tr>
+                    <td>{{r}}</td>
+                    {% for c in q["column_choices"] %}
+                      {% if q["option"] == "multiple" %}
+                      <td><input type="checkbox" value="{{r}}|{{c}}" name="{{r}}"></td>
+                      {% elif q["option"] == "single" %}
+                      <td><input type="radio" value="{{r}}|{{c}}" name="{{r}}"></td>
+                      {% elif q["option"] == "any" %}
+                      <td><input type="radio" value="{{r}}|{{c}}" name="{{r}}"></td>
+                      {%endif%}
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+              </table>
+            {% else %}
+              {% if q["option"] == "multiple" %}
                 {% for a in q["answers"] %}
                     <label class="checkbox">
                         <input type="checkbox" name="{{q['_id']}}" value="{{a["text"]}}">
                         {{a["text"]}}
                     </label>
                 {% endfor %}
-            {% elif q["option"] == "single" %}
+              {% elif q["option"] == "single" %}
                 {% for a in q["answers"] %}
                     <label class="radio">
                         <input type="radio" name="{{q['_id']}}" value="{{a["text"]}}">
                         {{a["text"]}}
                     </label>
                 {% endfor %}
-            {% elif q["option"] == "any" %}
+              {% elif q["option"] == "any" %}
                 {% for a in q["answers"] %}
                     <label class="checkbox">
                         <input type="checkbox" name="{{q['_id']}}" value="{{a["text"]}}">
                         {{a["text"]}}
                     </label>
                 {% endfor %}
+              {% endif %}
             {% endif %}
         {% endfor %}
         <!--End Survey-->

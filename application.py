@@ -240,8 +240,18 @@ def label(survey):
                 prev = -1
                 for q in survey_data["questions"]:
                     tmp = {"questions": q["text"], "answer": []}
-                    answer = request.form.getlist(str(q["_id"]))
-                    if answer == [] and q["option"] != "any":
+
+                    if "matrix" in q and q["matrix"] == True:
+                        answer = []
+                        for r in q["row_choices"]:
+                            lst = request.form.getlist(r)
+                            for e in lst:
+                                answer.append(e.split("|"))
+                    else:
+                        answer = request.form.getlist(str(q["_id"]))
+
+                    #You have to answer this question
+                    if answer == [] and q["option"] != "any":       
                         if "followup" in q and q["followup"] == True:
                             if prev != -1:
                                 prev_answer = request.form.getlist(str(prev))[0]
@@ -402,21 +412,32 @@ def edit_survey():
             if "new" in request.form and request.form["new"]:
                 question_nr = len(survey["questions"]) + 1 if "questions" in survey else 1
                 mongo.insert_survey_log(survey_log, username, "Created a new question")
-                return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr)
+                return render_template("editQuestion.html", survey_name=survey_name, question_nr=question_nr)
             #Insert a new question
             elif "insert" in request.form and request.form["insert"]:
                 question_nr = int(request.form["insert"]) + 1
                 mongo.insert_survey_log(survey_log, username, "Insert a new question")
-                return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr, flag="insert")
+                return render_template("editQuestion.html", survey_name=survey_name, question_nr=question_nr, flag="insert")
             #Edit an existing question
             elif "edit" in request.form and request.form["edit"]:
                 question_nr = request.form["edit"]
                 question = survey["questions"][int(question_nr)-1]
-                answers = ""
-                for a in question["answers"]:
-                    answers += a["text"] + "\n"
-                mongo.insert_survey_log(survey_log, username, "Edited question "+question_nr)
-                return render_template("editsurvey.html", survey_name=survey_name, question_nr=question_nr, question=question, answers=answers)
+                if "matrix" in question and question["matrix"] == True:
+                    row_choices = ""
+                    for r in question["row_choices"]:
+                        row_choices += r + "\n"
+                    column_choices = ""
+                    for c in question["column_choices"]:
+                        column_choices += c + "\n"
+                    mongo.insert_survey_log(survey_log, username, "Edited question " + question_nr)
+                    return render_template("editMatrixQuestion.html", survey_name=survey_name, question_nr=question_nr, 
+                            question=question, row_choices=row_choices, column_choices=column_choices)
+                else:
+                    answers = ""
+                    for a in question["answers"]:
+                        answers += a["text"] + "\n"
+                    mongo.insert_survey_log(survey_log, username, "Edited question " + question_nr)
+                    return render_template("editQuestion.html", survey_name=survey_name, question_nr=question_nr, question=question, answers=answers)
             #Delete an exisitng question
             elif "delete" in request.form and request.form["delete"]:
                 question_nr = request.form["delete"]
@@ -452,6 +473,18 @@ def edit_survey():
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
+@app.route("/matrix_question", methods=["POST", "GET"])
+def matrix_question():
+    if request.method == "POST":
+        try:
+            survey_name = request.form["survey_name"]
+            question_nr = request.form["question_nr"]
+            return render_template("editMatrixQuestion.html", survey_name=survey_name, question_nr=question_nr)
+        except KeyError:
+            return render_template("error.html", msg="Bad Request!")
+    else:
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
+
 @app.route("/build_survey", methods=["POST", "GET"])
 def build_survey():
     #Edit or create the actual question and answer
@@ -471,6 +504,45 @@ def build_survey():
                 if a:
                     lst.append({"answer_nr": answers.index(a), "text": a.strip("\r")})
             question = {"_id": int(question_nr), "option": option, "followup" : followup, "text": question_text, "answers": lst}
+            if request.form["submit"] == "Finish":
+                mongo.update_survey(survey_name, question)
+            elif request.form["submit"] == "Insert":
+                mongo.insert_survey_question(survey_name, question_nr, question)
+            survey = mongo.get_survey(survey_name)
+            survey_log = survey_name.split(" ")[0]+"_log"
+            log = mongo.get_survey_log(survey_log)
+            result = mongo.exist_survey()
+            survey = mongo.get_survey(survey_name)
+            return render_template("surveypage.html", survey=survey, result=result, log=log)
+        except KeyError:
+            return render_template("error.html", msg="Bad Request! You have to fill in the question and answer")
+    else:
+        return render_template("error.html", msg="Bad Request! Shouldn't come here")
+
+@app.route("/build_matrix_survey", methods=["POST", "GET"])
+def build_matrix_survey():
+    #Edit or create the actual matrix question and answer
+    if request.method == "POST":
+        try:
+            print "here"
+            question_text = request.form["question"].strip()
+            row_choices = request.form["row_choices"].strip().split("\n")
+            column_choices = request.form["column_choices"].strip().split("\n")
+            rows =[]
+            cols = []
+            for r in row_choices:
+                rows.append(r.strip("\r"))
+            for c in column_choices:
+                cols.append(c.strip("\r"))
+            option = request.form["option"]
+            survey_name = request.form["survey_name"]
+            question_nr = request.form["question_nr"]
+            matrix = True
+            followup = False
+            if "followup" in request.form and request.form["followup"] == "true":
+                followup = True
+            question = {"_id": int(question_nr), "option": option, "followup" : followup, "text": question_text, 
+                "row_choices": rows, "column_choices": cols, "matrix": matrix}
             if request.form["submit"] == "Finish":
                 mongo.update_survey(survey_name, question)
             elif request.form["submit"] == "Insert":
@@ -536,19 +608,12 @@ def save_survey():
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     try:
         """ Connect to MongoDB """
-        mongo = MongoDBCoordinator("localhost", "LabelTweets", port=10000)
+        mongo = MongoDBCoordinator("128.122.79.140", "LabelTweets", port=10000)
         app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
         app.debug = True
-        app.run(host='128.122.79.140', port=8080)
+        app.run(host='localhost', port=8080)
     except:
         print sys.exc_info()[0]
-=======
-    """ Connect to MongoDB """
-    mongo = MongoDBCoordinator("128.122.79.158", "LabelTweets", port=10000)
-    app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
-    app.debug = True
-    app.run(host='localhost', port=8080)
->>>>>>> Nothing
+
