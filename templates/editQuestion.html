@@ -72,6 +72,7 @@
     {% endif %}
 
     <form method="post" action="/build_survey" id="build_question">
+      <!--
       {% if "followup" in question and question["followup"] == True %}
         <label class="checkbox">
           <input type="checkbox" name="followup" value="true" checked> This is a follow up question for the previous question.
@@ -81,6 +82,7 @@
           <input type="checkbox" name="followup" value="true"> This is a follow up question for the previous question.
         </label>
       {% endif %}
+    -->
       <input type="hidden" name="survey_name" value="{{survey_name}}">
       <input type="hidden" name="question_nr" value="{{question_nr}}">
       {% if flag == "insert" %}

@@ -11,6 +11,8 @@ Created by Peihong Chai on 2013-01-28.
 import sys
 import StringIO
 import re
+import pytz
+import datetime
 from flask import Flask
 from flask import render_template
 from flask import session, redirect, url_for, escape, request
@@ -180,21 +182,7 @@ def start_coding(survey):
             return render_template("error.html", msg="Bad Request!")
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
-'''
-@app.route("/<survey>/links", methods=['POST', 'GET'])
-def display_links(survey):
-    if request.method == "POST":
-        try:
-            if request.form["appendlink"]:
-                link = request.form["appendlink"]
-                return render_template("link.html", link=link)
 
-        except KeyError:
-            print sys.exc_info()[0]
-            return render_template("error.html", msg="Bad Request!")
-    else:
-        return render_template("error.html", msg="Bad Request! Shouldn't come here")
-'''
 @app.route("/<survey>/label", methods=['POST', 'GET'])
 def label(survey):
     if request.method == "POST":
@@ -221,48 +209,44 @@ def label(survey):
                     return render_template("cong.html")
                 else:
                     return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=tweet_nr, survey=survey_data)
-            elif request.form["submit"] == "previous":
-                batch = request.form["batch"]
-                tweet_nr = int(request.form["tweet_nr"]) - 1 if int(request.form["tweet_nr"]) > 1 else int(request.form["tweet_nr"])
-                result = mongo.get_tweet(int(batch), int(tweet_nr), collection_tweet_name)
-                return render_template("label.html", batch=batch, username=username, result=result, tweet_nr=str(tweet_nr), survey=survey_data)
 
             elif request.form["submit"] == "next":
                 #Continue to label next tweet and save the label information
                 batch = request.form["batch"]
                 tweet_nr = request.form["tweet_nr"]
                 result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, collection_tweet_name)
-                pattern =  r"^No.*|^Don't.* "
                 if not result:
                     return render_template("error.html", msg="Internal Error")
                 tweet_id = request.form["tweetid"]
-                survey = []
-                prev = -1
+                survey = {}
+                survey["tweet_id"] = tweet_nr
+                survey["coder_name"] = username
+                survey["code_time"] = str(datetime.datetime.now(pytz.timezone('US/Eastern')))
                 for q in survey_data["questions"]:
-                    tmp = {"questions": q["text"], "answer": []}
-
+                    question_nr = q["_id"]
                     if "matrix" in q and q["matrix"] == True:
-                        answer = []
+                        checked_answer = []
                         for r in q["row_choices"]:
-                            lst = request.form.getlist(r)
+                            lst = request.form.getlist(r["text"])
                             for e in lst:
-                                answer.append(e.split("|"))
+                                checked_answer.append(e.split("|"))
+                        for r in q["row_choices"]:
+                            for c in q["column_choices"]:
+                                if [r,c] in checked_answer:
+                                    survey["Q_"+ str(question_nr) + "_" + str(r["answer_nr"] + 1) + "_" +str(c["answer_nr"] + 1)] = 1
+                                else:
+                                    survey["Q_"+ str(question_nr) + "_" + str(r["answer_nr"] + 1) + "_" + str(c["answer_nr"] + 1)] = 0      
                     else:
-                        answer = request.form.getlist(str(q["_id"]))
-
-                    #You have to answer this question
-                    if answer == [] and q["option"] != "any":       
-                        if "followup" in q and q["followup"] == True:
-                            if prev != -1:
-                                prev_answer = request.form.getlist(str(prev))[0]
-                                if not re.match(pattern, prev_answer):
-                                    return render_template("error.html", msg="You have to answer question " + str(q["_id"]))
-                        else:
-                            return render_template("error.html", msg="You haven't answer question " + str(q["_id"]))
-                    for a in answer:
-                        tmp["answer"].append(a)
-                    survey.append(tmp)
-                    prev = q["_id"]
+                        answers = q["answers"]
+                        checked_answer = request.form.getlist(str(q["_id"]))
+                        if checked_answer == [] and q["option"] != "any":       
+                            return render_template("error.html", msg="You have to answer question " + str(q["_id"]))
+                        for a in answers:
+                            if a["text"] in checked_answer:
+                                survey["Q_" + str(question_nr) + "_" + str(a["answer_nr"] + 1)] = 1
+                            else:
+                                survey["Q_" + str(question_nr) + "_" + str(a["answer_nr"] + 1)] = 0
+                #print survey
                 mongo.update_label(tweet_id, survey, batch, tweet_nr, collection_tweet_name, collection_batch_name, username)
                 if int(tweet_nr) == tweets_per_batch:
                     return render_template("cong.html")
@@ -319,34 +303,7 @@ def proces_survey():
             return render_template("error.html", msg="Bad Request! Go Back")
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
-'''
-@app.route("/edit_survey/randomizer", methods=["POST", "GET"])
-def edit_survey_randomizer():
-    #All the request of editing survey is processed here
-    if request.method == "POST":
-        try:
-            survey_name = request.form["survey_name"]
-            survey = mongo.get_survey(survey_name)
-            questions = survey["questions"] if "questions" in survey else []
-            description = survey["description"] if "description" in survey else ""
-            survey_log = survey_name.split(" ")[0]+"_log"
-            username = mongo.get_username(session['username'])
-            description = request.form["description"]
-            log = mongo.get_survey_log(survey_log)
-            mongo.insert_survey_log(survey_log, username, "Change the random block")
-            if "random" in request.form and request.form["random"] == "true":
-                mongo.add_random(survey_name, request.form["random_block"])
-                random_list = mongo.get_random(survey_name)
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, random_list=random_list, log=log)
-            elif "random_delete" in request.form and request.form["random_delete"] == "true":
-                mongo.remove_random(survey_name)
-                random_list = mongo.get_random(survey_name)
-                return render_template("surveypage.html", survey_name=survey_name, questions=questions, description=description, random_list=random_list, log=log)
-        except KeyError:
-            return render_template("error.html", msg="Bad Request!Go Back")
-    else:
-        return render_template("error.html", msg="Bad Request! Shouldn't come here")
-'''
+
 @app.route("/edit_survey/description", methods=["POST", "GET"])
 def edit_survey_description():
     #All the request of editing survey is processed here
@@ -425,10 +382,10 @@ def edit_survey():
                 if "matrix" in question and question["matrix"] == True:
                     row_choices = ""
                     for r in question["row_choices"]:
-                        row_choices += r + "\n"
+                        row_choices += r["text"] + "\n"
                     column_choices = ""
                     for c in question["column_choices"]:
-                        column_choices += c + "\n"
+                        column_choices += c["text"] + "\n"
                     mongo.insert_survey_log(survey_log, username, "Edited question " + question_nr)
                     return render_template("editMatrixQuestion.html", survey_name=survey_name, question_nr=question_nr, 
                             question=question, row_choices=row_choices, column_choices=column_choices)
@@ -524,16 +481,15 @@ def build_matrix_survey():
     #Edit or create the actual matrix question and answer
     if request.method == "POST":
         try:
-            print "here"
             question_text = request.form["question"].strip()
             row_choices = request.form["row_choices"].strip().split("\n")
             column_choices = request.form["column_choices"].strip().split("\n")
             rows =[]
             cols = []
             for r in row_choices:
-                rows.append(r.strip("\r"))
+                rows.append({"answer_nr": row_choices.index(r), "text": r.strip("\r")})
             for c in column_choices:
-                cols.append(c.strip("\r"))
+                cols.append({"answer_nr": column_choices.index(c), "text": c.strip("\r")})
             option = request.form["option"]
             survey_name = request.form["survey_name"]
             question_nr = request.form["question_nr"]
@@ -610,10 +566,10 @@ def save_survey():
 if __name__ == "__main__":
     try:
         """ Connect to MongoDB """
-        mongo = MongoDBCoordinator("localhost", "LabelTweets", port=10000)
+        mongo = MongoDBCoordinator("128.122.79.140", "LabelTweets", port=10000)
         app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
-        #app.debug = True
-        app.run(host='128.122.79.140', port=8080)
+        app.debug = True
+        app.run(host='localhost', port=8080)
     except:
         print sys.exc_info()[0]
 

@@ -78,21 +78,21 @@
                 <tr>
                   <td></td>
                   {% for c in q["column_choices"] %}
-                    <td>{{c}}</td>
+                    <td>{{c['text']}}</td>
                   {% endfor %}
                 </tr>
                 {% set count = 0 %}
                 {% for r in q["row_choices"] %}
                   {% set count = count + 1 %}
                   <tr>
-                    <td>{{r}}</td>
+                    <td>{{r["text"]}}</td>
                     {% for c in q["column_choices"] %}
                       {% if q["option"] == "multiple" %}
-                      <td><input type="checkbox" value="{{r}}|{{c}}" name="{{r}}"></td>
+                      <td><input type="checkbox" value="{{r['text']}}|{{c['text']}}" name="{{r['text']}}"></td>
                       {% elif q["option"] == "single" %}
-                      <td><input type="radio" value="{{r}}|{{c}}" name="{{r}}"></td>
+                      <td><input type="radio" value="{{r['text']}}|{{c['text']}}" name="{{r['text']}}"></td>
                       {% elif q["option"] == "any" %}
-                      <td><input type="radio" value="{{r}}|{{c}}" name="{{r}}"></td>
+                      <td><input type="radio" value="{{r['text']}}|{{c['text']}}" name="{{r['text']}}"></td>
                       {%endif%}
                     {% endfor %}
                   </tr>
@@ -124,7 +124,6 @@
             {% endif %}
         {% endfor %}
         <!--End Survey-->
-        <input type="submit" name="submit" value="previous" class="btn btn-primary btn-large">
         <input type="submit" name="submit" value="next" class="btn btn-primary btn-large">
       </form>
     {% else %}

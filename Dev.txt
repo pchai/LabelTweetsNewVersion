@@ -1,0 +1,18 @@
+Dev
+
+If the tweet refers to any of the following parties, coalitions, and their leaders, please characterize it as (Se il tweet cita uno dei seguenti partiti, coalizioni e leader, quale posizione esprime nei loro confronti?)
+
+Bersani, PD and center-left (Bersani, PD e centro-sinistra)
+Berlusconi, PDL and center-right (Berlusconi, PDL e centro-destra)
+Grillo and Five Star Movement (Grillo e Movimento 5 Stelle)
+Monti, Civic Choice and center (Monti, Scelta Civica e centro)
+
+
+Very pro (molto favorevole)
+Somewhat pro (abbatsanza favorevole)
+Neutral (neutrale)
+Somewhat against (abbastanza sfavorevole)
+Very against (molto sfaveorevole)
+Mixed message, both pro and against (Ambiguo, sia favorevole sia contrario)
+Hard to tell (non so)
+Does not mention (non lo cita)

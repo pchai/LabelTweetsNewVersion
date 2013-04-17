@@ -106,12 +106,12 @@
                 <tr>
                   <td></td>
                   {% for c in q["column_choices"] %}
-                    <td>{{c}}</td>
+                    <td>{{c["text"]}}</td>
                   {% endfor %}
                 </tr>
                 {% for r in q["row_choices"] %}
                   <tr>
-                    <td>{{r}}</td>
+                    <td>{{r["text"]}}</td>
                     {% for c in q["column_choices"] %}
                       {% if q["option"] == "multiple" %}
                       <td><input type="checkbox" value=""></td>
