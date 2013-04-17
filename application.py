@@ -180,7 +180,7 @@ def start_coding(survey):
             return render_template("error.html", msg="Bad Request!")
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
-
+'''
 @app.route("/<survey>/links", methods=['POST', 'GET'])
 def display_links(survey):
     if request.method == "POST":
@@ -194,7 +194,7 @@ def display_links(survey):
             return render_template("error.html", msg="Bad Request!")
     else:
         return render_template("error.html", msg="Bad Request! Shouldn't come here")
-
+'''
 @app.route("/<survey>/label", methods=['POST', 'GET'])
 def label(survey):
     if request.method == "POST":
@@ -610,10 +610,10 @@ def save_survey():
 if __name__ == "__main__":
     try:
         """ Connect to MongoDB """
-        mongo = MongoDBCoordinator("128.122.79.140", "LabelTweets", port=10000)
+        mongo = MongoDBCoordinator("localhost", "LabelTweets", port=10000)
         app.secret_key = '\xa0\x1e\x95t\xcf\x7f\xe3J\xdf\x96D{98\x91iR\xb6\xfa\xb6g\xfc\x0fB'
-        app.debug = True
-        app.run(host='localhost', port=8080)
+        #app.debug = True
+        app.run(host='128.122.79.140', port=8080)
     except:
         print sys.exc_info()[0]
 

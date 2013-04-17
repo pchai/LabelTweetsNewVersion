@@ -37,7 +37,6 @@
 <div class="container" style="margin-top:120px; padding-bottom:50px">
   <div class="row">
     {% if username %}
-      <form action="/{{survey['survey_name']}}/links" method="POST" target="_blank">
         <div class="navbar navbar-fixed-top">
           <div class="navbar-inner">
             <div class="container">
@@ -46,9 +45,9 @@
               <br>
               <strong>Tweet: </strong> {{result["text"]}}
               {% for link in result["link"] %}
-              <button type="submit" name="appendlink" value="{{link}}" class="btn btn-small">
+              <a name="appendlink" href="{{link}}" target="_blank" class="btn btn-small">
               <abbr title="{{link}}" class="initialism">Go to Link</abbr>
-              </button>
+              </a>
               {% endfor %}
               <br>
               <strong>User Name: </strong>
@@ -62,7 +61,6 @@
             </div>
           </div>
         </div>
-      </form>
 
       <form action="/{{survey['survey_name']}}/label" method="POST">
         <small>Hit the 'This is SPAM' button if you think the tweet is spam. Spam is defined as: A mass marketing, 

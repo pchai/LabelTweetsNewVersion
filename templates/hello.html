@@ -22,6 +22,10 @@
         alert("User name must be filled in order to sign up");
         return false;
       }
+    if(!/^[a-z0-9]+$/i.test(value2)){
+        alert("Invalid user name, try a new one. You can only use letters from a-zA-Z0-9_");
+        return false;
+    }
   }
   function validateSignInForm()
   {

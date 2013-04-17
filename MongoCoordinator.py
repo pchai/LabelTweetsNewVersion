@@ -238,9 +238,9 @@ class MongoDBCoordinator:
         collection_batch = self.dbh[batch]
         result = collection.find_one({"id_str": tweet_id})
         if "label_option" in result:
-            collection.update({"id_str": tweet_id}, {"$push": {"label_option": {"user": username, "survey":survey}}}, safe=True)
+	    collection.update({"id_str": tweet_id}, {"$push": {"label_option": {username:{"survey":survey}}}}, safe=True)
         else:
-            collection.update({"id_str": tweet_id}, {"$set": {"label_option": [{"user": username, "survey":survey}]}}, safe=True)
+            collection.update({"id_str": tweet_id}, {"$set": {"label_option": [{username:{"survey":survey}}]}}, safe=True)
         collection_batch.update({"batch": int(batch_nr)}, {"$set": {"owner."+username: int(tweet_nr)}}, safe=True)
 
     def lock_survey(self, survey_name, bool_value):
