@@ -197,7 +197,7 @@ def label(survey):
 
             if request.form["submit"] == "This is spam":
                 #If it is a SPAM
-                survey = [{"SPAM": True}]
+                survey = {"SPAM": True}
                 batch = request.form["batch"]
                 tweet_nr = request.form["tweet_nr"]
                 result = mongo.get_tweet(int(batch), int(tweet_nr) + 1, collection_tweet_name)
